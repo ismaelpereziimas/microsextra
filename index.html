@@ -109,6 +109,19 @@ const app = (function() {
         preguntasActivas: []
     };
 
+    // --- FUNCIONES DE SOPORTE UI FALTANTES ---
+    const showToast = (msg, type = 'info') => {
+        const bg = type === 'error' ? 'bg-red-500' : (type === 'success' ? 'bg-green-500' : 'bg-blue-500');
+        const icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        const t = document.createElement('div');
+        t.className = `toast ${bg} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3`;
+        t.innerHTML = `<i class="fas ${icon} text-xl"></i><span class="font-medium">${msg}</span>`;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => { t.classList.add('hiding'); setTimeout(() => t.remove(), 500); }, 4000);
+    };
+
+    const formatearTiempo = (min, seg) => `${min.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
+
     // BANCO DE 33 PREGUNTAS (Base 100 con 1 pt de regalo)
     const bancoMaestro = [
         {
@@ -122,7 +135,7 @@ const app = (function() {
                 'Ordena automáticamente la información alfabéticamente al declararse.'
             ],
             correcta: 1,
-            retro: 'A diferencia de las listas, un diccionario es una estructura de datos que almacena pares de elementos en forma de clave-valor[cite: 4].'
+            retro: 'A diferencia de las listas, un diccionario es una estructura de datos que almacena pares de elementos en forma de clave-valor.'
         },
         {
             id: 'q2', nivel: 2, tipo: 'radio', pts: 3,
@@ -135,7 +148,7 @@ const app = (function() {
                 'END'
             ],
             correcta: 2,
-            retro: 'Las rutinas de interrupción de hardware exigen el mnemotécnico RETFIE para devolver el control al código principal[cite: 7].'
+            retro: 'Las rutinas de interrupción de hardware exigen el mnemotécnico RETFIE para devolver el control al código principal.'
         },
         {
             id: 'q3', nivel: 1, tipo: 'radio', pts: 3,
@@ -148,7 +161,7 @@ const app = (function() {
                 'Pasar siempre variables por valor y no por referencia.'
             ],
             correcta: 1,
-            retro: 'Todo enfoque recursivo requiere definir el caso base, que es el caso más simple del problema, donde la función ya no debe volver a llamarse a sí misma[cite: 1].'
+            retro: 'Todo enfoque recursivo requiere definir el caso base, que es el caso más simple del problema, donde la función ya no debe volver a llamarse a sí misma.'
         },
         {
             id: 'q4', nivel: 2, tipo: 'radio', pts: 3,
@@ -161,7 +174,7 @@ const app = (function() {
                 'BTG PORTD, 0'
             ],
             correcta: 0,
-            retro: 'Si no se limpian las banderas de interrupción (como el comando BCF INTCON, INT0IF), el hardware asume que el evento sigue pendiente[cite: 7].'
+            retro: 'Si no se limpian las banderas de interrupción (como el comando BCF INTCON, INT0IF), el hardware asume que el evento sigue pendiente.'
         },
         {
             id: 'q5', nivel: 1, tipo: 'radio', pts: 3,
@@ -174,7 +187,7 @@ const app = (function() {
                 'señales[-1]'
             ],
             correcta: 1,
-            retro: 'Para acceder a los elementos del arreglo se hace por medio del índice, donde el índice 0 es el primer elemento[cite: 2].'
+            retro: 'Para acceder a los elementos del arreglo se hace por medio del índice, donde el índice 0 es el primer elemento.'
         },
         {
             id: 'q6', nivel: 2, tipo: 'codigo', pts: 3,
@@ -183,7 +196,7 @@ const app = (function() {
             codigoBase: "________ PORTB, 0\nGOTO APAGA",
             respuestaEsperada: "BTFSS",
             respuestaRegex: /btfss/i,
-            retro: 'El mnemotécnico BTFSS evalúa si el bit está en 1. Si está oprimido, salta la siguiente instrucción (ej. GOTO APAGA)[cite: 8].'
+            retro: 'El mnemotécnico BTFSS evalúa si el bit está en 1. Si está oprimido, salta la siguiente instrucción (ej. GOTO APAGA).'
         },
         {
             id: 'q7', nivel: 3, tipo: 'codigo', pts: 3,
@@ -192,7 +205,7 @@ const app = (function() {
             codigoBase: "for clave, valor in paciente.________():",
             respuestaEsperada: "items",
             respuestaRegex: /items/i,
-            retro: 'Podemos recorrer los valores con un ciclo for desempaquetándolos gracias al método .items() de los diccionarios[cite: 4].'
+            retro: 'Podemos recorrer los valores con un ciclo for desempaquetándolos gracias al método .items() de los diccionarios.'
         },
         {
             id: 'q8', nivel: 2, tipo: 'radio', pts: 3,
@@ -205,7 +218,7 @@ const app = (function() {
                 'Genera un error porque ADDWF solo acepta literales numéricas.'
             ],
             correcta: 1,
-            retro: 'ADDWF suma un registro ingresado con W. El resultado puede ser almacenado en W si se selecciona el argumento d como 0[cite: 9].'
+            retro: 'ADDWF suma un registro ingresado con W. El resultado puede ser almacenado en W si se selecciona el argumento d como 0.'
         },
         {
             id: 'q9', nivel: 2, tipo: 'radio', pts: 3,
@@ -218,7 +231,7 @@ const app = (function() {
                 'BTG 02H'
             ],
             correcta: 1,
-            retro: 'El comando ADDLW suma una literal o número que ingresemos directamente con el registro W[cite: 10].'
+            retro: 'El comando ADDLW suma una literal o número que ingresemos directamente con el registro W.'
         },
         {
             id: 'q10', nivel: 3, tipo: 'codigo', pts: 3,
@@ -227,7 +240,7 @@ const app = (function() {
             codigoBase: "if edad>=18 ________ licencia_conducir==True:",
             respuestaEsperada: "and",
             respuestaRegex: /and/i,
-            retro: 'La evaluación compuesta requiere el uso del operador "and" para confirmar que ambas premisas son verdaderas simultáneamente[cite: 3].'
+            retro: 'La evaluación compuesta requiere el uso del operador "and" para confirmar que ambas premisas son verdaderas simultáneamente.'
         },
         {
             id: 'q11', nivel: 1, tipo: 'radio', pts: 3,
@@ -240,7 +253,7 @@ const app = (function() {
                 'Lanza un error de índice.'
             ],
             correcta: 1,
-            retro: 'El método .remove elimina únicamente el primer 10 que encuentre en el barrido secuencial[cite: 2].'
+            retro: 'El método .remove elimina únicamente el primer 10 que encuentre en el barrido secuencial.'
         },
         {
             id: 'q12', nivel: 2, tipo: 'radio', pts: 3,
@@ -253,7 +266,7 @@ const app = (function() {
                 'PORTA'
             ],
             correcta: 1,
-            retro: 'Para configurar un puerto entero como entrada en la inicialización, se carga la literal de unos (B\'11111111\') y se mueve al TRIS correspondiente[cite: 9].'
+            retro: 'Para configurar un puerto entero como entrada en la inicialización, se carga la literal de unos (B\'11111111\') y se mueve al TRIS correspondiente.'
         },
         {
             id: 'q13', nivel: 1, tipo: 'radio', pts: 3,
@@ -266,7 +279,7 @@ const app = (function() {
                 'def funcion()'
             ],
             correcta: 1,
-            retro: 'El ciclo for permite que una variable iteradora tome el valor de cada elemento de la lista en cada repetición[cite: 5].'
+            retro: 'El ciclo for permite que una variable iteradora tome el valor de cada elemento de la lista en cada repetición.'
         },
         {
             id: 'q14', nivel: 1, tipo: 'radio', pts: 3,
@@ -279,7 +292,7 @@ const app = (function() {
                 '0, 1, 2, 3, 4, 5'
             ],
             correcta: 2,
-            retro: 'Al especificar un inicio y un fin, el rango genera números desde el límite inferior hasta un entero antes del límite superior (el 6 no se incluye)[cite: 5].'
+            retro: 'Al especificar un inicio y un fin, el rango genera números desde el límite inferior hasta un entero antes del límite superior (el 6 no se incluye).'
         },
         {
             id: 'q15', nivel: 2, tipo: 'codigo', pts: 3,
@@ -288,7 +301,7 @@ const app = (function() {
             codigoBase: "repositorio_imagenes.________(nueva_imagen)",
             respuestaEsperada: "append",
             respuestaRegex: /append/i,
-            retro: 'Se puede agregar un nuevo elemento al final de la lista preexistente haciendo uso del método .append[cite: 2].'
+            retro: 'Se puede agregar un nuevo elemento al final de la lista preexistente haciendo uso del método .append.'
         },
         {
             id: 'q16', nivel: 3, tipo: 'codigo', pts: 3,
@@ -297,7 +310,7 @@ const app = (function() {
             codigoBase: "MOVF PORTB, ________",
             respuestaEsperada: "0",
             respuestaRegex: /0/,
-            retro: 'MOVF mueve el byte contenido en un registro a W, siempre y cuando se seleccione el argumento D como 0[cite: 9].'
+            retro: 'MOVF mueve el byte contenido en un registro a W, siempre y cuando se seleccione el argumento D como 0.'
         },
         {
             id: 'q17', nivel: 2, tipo: 'radio', pts: 3,
@@ -310,7 +323,7 @@ const app = (function() {
                 'Limpiando el TMR0IF.'
             ],
             correcta: 1,
-            retro: 'La creación de la rutina "LED" seguida inmediatamente de un "GOTO LED" establece el bucle ininterrumpido necesario para operar hardware continuo[cite: 6].'
+            retro: 'La creación de la rutina "LED" seguida inmediatamente de un "GOTO LED" establece el bucle ininterrumpido necesario para operar hardware continuo.'
         },
         {
             id: 'q18', nivel: 3, tipo: 'codigo', pts: 3,
@@ -319,7 +332,7 @@ const app = (function() {
             codigoBase: "paciente________ = 38.0",
             respuestaEsperada: "[\"temperatura\"]",
             respuestaRegex: /\[(\"|\')temperatura(\"|\')\]/i,
-            retro: 'Para modificar un elemento específico se accede referenciando la clave exacta entre corchetes para reescribir su valor asociado[cite: 4].'
+            retro: 'Para modificar un elemento específico se accede referenciando la clave exacta entre corchetes para reescribir su valor asociado.'
         },
         {
             id: 'q19', nivel: 2, tipo: 'radio', pts: 3,
@@ -332,7 +345,7 @@ const app = (function() {
                 'RCON y su bit IPEN.'
             ],
             correcta: 3,
-            retro: 'El comando BSF RCON, IPEN es el responsable de habilitar a nivel arquitectónico el trabajo con prioridades de interrupción[cite: 7].'
+            retro: 'El comando BSF RCON, IPEN es el responsable de habilitar a nivel arquitectónico el trabajo con prioridades de interrupción.'
         },
         {
             id: 'q20', nivel: 1, tipo: 'radio', pts: 3,
@@ -345,7 +358,7 @@ const app = (function() {
                 'lista.append(n)'
             ],
             correcta: 0,
-            retro: 'La invocación recursiva ocurre cuando la función se llama a sí misma dentro del bloque ejecutable, permitiendo fraccionar el cálculo[cite: 1].'
+            retro: 'La invocación recursiva ocurre cuando la función se llama a sí misma dentro del bloque ejecutable, permitiendo fraccionar el cálculo.'
         },
         {
             id: 'q21', nivel: 2, tipo: 'codigo', pts: 3,
@@ -354,7 +367,7 @@ const app = (function() {
             codigoBase: "MOVLW 0x0F\nMOVWF ________",
             respuestaEsperada: "ADCON1",
             respuestaRegex: /adcon1/i,
-            retro: 'Configurar ADCON1 con B\'00001111\' (0x0F) establece los pines compartidos del microcontrolador como entradas/salidas digitales puras[cite: 6].'
+            retro: 'Configurar ADCON1 con B\'00001111\' (0x0F) establece los pines compartidos del microcontrolador como entradas/salidas digitales puras.'
         },
         {
             id: 'q22', nivel: 2, tipo: 'radio', pts: 3,
@@ -367,7 +380,7 @@ const app = (function() {
                 'Null y Void'
             ],
             correcta: 1,
-            retro: 'En Python, las banderas lógicas o booleanas almacenan estrictamente los objetos nativos True o False con mayúscula inicial[cite: 3].'
+            retro: 'En Python, las banderas lógicas o booleanas almacenan estrictamente los objetos nativos True o False con mayúscula inicial.'
         },
         {
             id: 'q23', nivel: 1, tipo: 'radio', pts: 3,
@@ -380,7 +393,7 @@ const app = (function() {
                 'STOP'
             ],
             correcta: 2,
-            retro: 'Es importante poner END al término del archivo, ya que sin esta directiva el programa simplemente no compila[cite: 6].'
+            retro: 'Es importante poner END al término del archivo, ya que sin esta directiva el programa simplemente no compila.'
         },
         {
             id: 'q24', nivel: 3, tipo: 'codigo', pts: 3,
@@ -389,7 +402,7 @@ const app = (function() {
             codigoBase: "BTFSS INTCON, ________",
             respuestaEsperada: "TMR0IF",
             respuestaRegex: /tmr0if/i,
-            retro: 'Como el contador es automático, el software debe verificar mediante BTFSS si el registro bandera TMR0IF ya indica término[cite: 7].'
+            retro: 'Como el contador es automático, el software debe verificar mediante BTFSS si el registro bandera TMR0IF ya indica término.'
         },
         {
             id: 'q25', nivel: 2, tipo: 'radio', pts: 3,
@@ -402,7 +415,7 @@ const app = (function() {
                 '6 iteraciones, el último valor es 5.'
             ],
             correcta: 1,
-            retro: 'El bucle repetirá la rutina 5 veces y, como inicia en cero, los números del iterador irán del 0 al 4[cite: 5].'
+            retro: 'El bucle repetirá la rutina 5 veces y, como inicia en cero, los números del iterador irán del 0 al 4.'
         },
         {
             id: 'q26', nivel: 2, tipo: 'radio', pts: 3,
@@ -415,7 +428,7 @@ const app = (function() {
                 'MOVLW'
             ],
             correcta: 1,
-            retro: 'El mnemotécnico BTG (Bit Toggle) invierte el estado lógico del bit especificado en el registro objetivo (ej. BTG PORTD, 0)[cite: 7].'
+            retro: 'El mnemotécnico BTG (Bit Toggle) invierte el estado lógico del bit especificado en el registro objetivo (ej. BTG PORTD, 0).'
         },
         {
             id: 'q27', nivel: 1, tipo: 'radio', pts: 3,
@@ -428,7 +441,7 @@ const app = (function() {
                 'Porque no respetan el orden de inserción.'
             ],
             correcta: 1,
-            retro: 'La mutabilidad significa que los elementos, ya sea cambiando valores por índices en listas[cite: 2] o modificando valores por clave en diccionarios[cite: 4], pueden actualizarse dinámicamente.'
+            retro: 'La mutabilidad significa que los elementos, ya sea cambiando valores por índices en listas o modificando valores por clave en diccionarios, pueden actualizarse dinámicamente.'
         },
         {
             id: 'q28', nivel: 3, tipo: 'codigo', pts: 3,
@@ -437,7 +450,7 @@ const app = (function() {
             codigoBase: "________ B\'00000010\'",
             respuestaEsperada: "MOVLW",
             respuestaRegex: /movlw/i,
-            retro: 'La instrucción MOVLW (Move Literal to W) es requerida para asignar valores constantes previos a su envío hacia registros físicos[cite: 9].'
+            retro: 'La instrucción MOVLW (Move Literal to W) es requerida para asignar valores constantes previos a su envío hacia registros físicos.'
         },
         {
             id: 'q29', nivel: 3, tipo: 'codigo', pts: 3,
@@ -446,7 +459,7 @@ const app = (function() {
             codigoBase: "if ________(lista)==0:",
             respuestaEsperada: "len",
             respuestaRegex: /len/i,
-            retro: 'La validación del caso base en este algoritmo recursivo comprueba si el array fue troceado en su totalidad comprobando su longitud (len)[cite: 1].'
+            retro: 'La validación del caso base en este algoritmo recursivo comprueba si el array fue troceado en su totalidad comprobando su longitud (len).'
         },
         {
             id: 'q30', nivel: 2, tipo: 'radio', pts: 3,
@@ -459,7 +472,7 @@ const app = (function() {
                 'Que el bit 3 del puerto 3 está activo.'
             ],
             correcta: 1,
-            retro: 'Declarar una variable en Ensamblador significa separar un espacio físico de memoria (dirección de registro) y ponerle nombre para referenciarlo[cite: 9].'
+            retro: 'Declarar una variable en Ensamblador significa separar un espacio físico de memoria (dirección de registro) y ponerle nombre para referenciarlo.'
         },
         {
             id: 'q31', nivel: 2, tipo: 'radio', pts: 3,
@@ -472,7 +485,7 @@ const app = (function() {
                 'Enteros indexados.'
             ],
             correcta: 2,
-            retro: 'El ciclo for asociado a .items() entrega secuencialmente el par correspondiente, lo que permite asignar tanto clave como valor a las variables del iterador[cite: 4].'
+            retro: 'El ciclo for asociado a .items() entrega secuencialmente el par correspondiente, lo que permite asignar tanto clave como valor a las variables del iterador.'
         },
         {
             id: 'q32', nivel: 2, tipo: 'radio', pts: 3,
@@ -485,7 +498,7 @@ const app = (function() {
                 'Sí, porque 02H es simplemente una máscara lógica de lectura.'
             ],
             correcta: 1,
-            retro: 'Al sumar una literal con W, el resultado siempre se almacena en W, por lo que el valor inicial de W queda destruido (sobreescrito)[cite: 10].'
+            retro: 'Al sumar una literal con W, el resultado siempre se almacena en W, por lo que el valor inicial de W queda destruido (sobreescrito).'
         },
         {
             id: 'q33', nivel: 1, tipo: 'radio', pts: 3,
@@ -498,7 +511,7 @@ const app = (function() {
                 'Por punto y coma al final de cada instrucción.'
             ],
             correcta: 2,
-            retro: 'Al igual que con el bloque if, la rutina a ejecutar dentro del else en Python está dictada por su nivel de indentación estructural tras los dos puntos[cite: 3].'
+            retro: 'Al igual que con el bloque if, la rutina a ejecutar dentro del else en Python está dictada por su nivel de indentación estructural tras los dos puntos.'
         }
     ];
 

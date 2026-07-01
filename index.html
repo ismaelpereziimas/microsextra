@@ -11,13 +11,11 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .code-font { font-family: 'Fira Code', monospace; }
         
-        /* Animaciones para Notificaciones */
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         .toast { animation: slideIn 0.3s ease-out forwards; }
         .toast.hiding { animation: fadeOut 0.5s ease-out forwards; }
 
-        /* Estilos de impresión para el reporte final */
         @media print {
             body { background: white; }
             .no-print { display: none !important; }
@@ -52,7 +50,7 @@
                                 <strong>Reglas de Integridad (Obligatorias):</strong><br>
                                 1. Al presionar comenzar, el sistema registrará si abandona esta pestaña.<br>
                                 2. Está prohibido el uso de herramientas de IA. El examen evalúa razonamiento algorítmico, no memorización.<br>
-                                3. La prueba consta de casos prácticos clínicos con niveles de complejidad progresiva (Basado en la Taxonomía de Bloom).
+                                3. La prueba consta de casos prácticos clínicos con niveles de complejidad progresiva.
                             </p>
                         </div>
                     </div>
@@ -75,7 +73,7 @@
 
             <div id="vista-examen" class="hidden">
                 <div id="contenedor-preguntas" class="space-y-8">
-                    </div>
+                </div>
                 
                 <div class="mt-10 pt-6 border-t flex justify-end">
                     <button onclick="app.entregar()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg shadow-md">
@@ -86,7 +84,7 @@
 
             <div id="vista-reporte" class="hidden">
                 <div id="reporte-contenido">
-                    </div>
+                </div>
                 
                 <div class="mt-8 flex justify-center gap-4 no-print">
                     <button onclick="window.print()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow">
@@ -112,183 +110,129 @@ const app = (function() {
         preguntasActivas: []
     };
 
-    // BANCO DE PREGUNTAS ALTA DIFICULTAD - ENFOQUE BIOMÉDICO (10 Reactivos = 40 Puntos Totales)
+    // BANCO DE PREGUNTAS - ALTA DIFICULTAD
     const bancoMaestro = [
-        // NIVEL 1: Recordar y Comprender
+        // NIVEL 1: Recordar y Comprender Avanzado
         {
             id: 'q1', nivel: 1, tipo: 'radio', pts: 4,
-            contexto: 'Estructuras de Datos: Sistema de Expedientes Electrónicos (EMR) procesado en Python. Se tiene almacenado el estado del paciente en un diccionario.',
-            texto: 'Si intenta acceder dinámicamente a una clave inexistente como `paciente["presion_intracraneal"]` mediante notación de corchetes, ¿qué sucede computacionalmente y por qué los diccionarios operan así frente a las listas?',
+            contexto: 'Python: Gestión de Memoria en Estructuras Clínicas. Se tiene un diccionario "paciente_a" con una lista anidada de medicamentos. Se realiza la asignación `paciente_b = paciente_a.copy()`.',
+            texto: 'Si posteriormente se modifica la lista de medicamentos dentro de `paciente_b`, ¿qué ocurre con los datos de `paciente_a`?',
             opciones: [
-                'Devuelve un valor de `0` automáticamente para prevenir caídas del sistema hospitalario.',
-                'Lanza una excepción de tipo `KeyError` debido a que utilizan tablas Hash de acceso O(1) que requieren claves explícitas.',
-                'Itera todos los registros secuencialmente y al no encontrarlo devuelve un objeto de tipo `None`.',
-                'El diccionario agrega la clave faltante automáticamente en tiempo de ejecución para evitar corrupción de datos.'
+                'Permanecen inalterados, ya que el método .copy() genera instancias completamente independientes en memoria.',
+                'Se modifican también, porque .copy() crea una copia superficial (shallow copy) copiando la referencia del objeto anidado, no sus valores.',
+                'Lanza un error en tiempo de ejecución debido a un bloqueo de mutabilidad sobre diccionarios clonados.',
+                'Python automáticamente convierte la lista anidada en una tupla para proteger la integridad del dato original.'
             ],
             correcta: 1,
-            retro: 'A diferencia de las listas (que usan índices secuenciales), los diccionarios implementan mapeo mediante tablas hash. Consultar una clave que no fue hasheada rompe la referencia, lanzando un KeyError para mantener la integridad de la base de datos.'
+            retro: 'El método .copy() nativo de diccionarios realiza una "Shallow Copy". Clona el primer nivel, pero los objetos mutables anidados (como listas) siguen apuntando al mismo espacio de memoria RAM. Para clonar todo, se debe usar `copy.deepcopy()`.'
         },
         {
             id: 'q2', nivel: 1, tipo: 'radio', pts: 4,
-            contexto: 'Ensamblador PIC18F: Arquitectura de Interrupciones en un Monitor de Signos Vitales. Se usa INT0 (Alta prioridad) para detectar una arritmia grave.',
-            texto: 'Analizando el flujo de trabajo del hardware, ¿cuál es la acción crítica por software que debe realizarse DENTRO de la subrutina de interrupción (ISR) ANTES de invocar el comando `RETFIE`?',
+            contexto: 'Microcontroladores: Salvaguarda de Contexto (Context Saving) en PIC18F.',
+            texto: 'Al ocurrir una interrupción de ALTA prioridad en la arquitectura PIC18F, ¿por qué NO es estrictamente necesario escribir rutinas en software para salvar registros como W, STATUS y BSR antes de ejecutar la ISR?',
             opciones: [
-                'Deshabilitar el bit GIE (Global Interrupt Enable) en el registro INTCON.',
-                'Llamar a un delay mediante TMR0 para estabilizar la lectura del puerto.',
-                'Limpiar manualmente el bit bandera (Flag) correspondiente, por ejemplo `BCF INTCON, INT0IF`.',
-                'Redireccionar el Program Counter mediante un `GOTO MAIN` para reiniciar el ciclo de sensado.'
+                'Porque el PIC18F transfiere temporalmente toda la RAM de acceso al bloque EEPROM.',
+                'Porque el compilador siempre inyecta automáticamente las instrucciones MOVFF al inicio de toda ISR, sin importar la prioridad.',
+                'Porque el hardware transfiere automáticamente esos 3 registros al Fast Register Stack (Shadow Registers) en 1 ciclo de instrucción.',
+                'Porque las interrupciones de alta prioridad suspenden el ciclo de reloj (Clock), congelando el estado de la ALU.'
             ],
             correcta: 2,
-            retro: 'El hardware levanta la bandera (Flag) de interrupción, pero no la limpia automáticamente. Si la ISR termina sin un BCF al flag respectivo, al ejecutar RETFIE el sistema volverá a entrar de inmediato a la interrupción en un bucle infinito.'
+            retro: 'La arquitectura PIC18F incluye "Shadow Registers" (Fast Register Stack). Ante un vector de alta prioridad (0x0008), el hardware respalda automáticamente W, STATUS y BSR. Esto permite responder inmediatamente a eventos críticos en bioseñales sin perder tiempo de instrucción.'
         },
         {
             id: 'q3', nivel: 1, tipo: 'radio', pts: 4,
-            contexto: 'Diseño Algorítmico: Extracción de características en ecocardiografía. Se usa una función recursiva para delinear las fronteras de los ventrículos (Segmentación).',
-            texto: 'En la teoría de la recursividad, ¿qué riesgo estructural a nivel del Sistema Operativo ocurre si el algoritmo omite definir correctamente su "caso base" (condición de parada)?',
+            contexto: 'Python: Segmentación recursiva (Region Growing) para delimitar ventrículos en imágenes M-Mode.',
+            texto: 'El algoritmo recursivo implementado arroja el error `RecursionError: maximum recursion depth exceeded`. Considerando la arquitectura de Python, ¿cuál es el motivo principal de este colapso?',
             opciones: [
-                'El procesador automáticamente descarta las llamadas más antiguas mediante el recolector de basura (Garbage Collector).',
-                'El espacio de memoria reservado para la Pila (Stack) se satura por los múltiples marcos de función, provocando un Stack Overflow.',
-                'El algoritmo se transforma implícitamente en un ciclo For infinito, bloqueando la lectura del teclado.',
-                'Se genera un desbordamiento de Heap provocando fragmentación en la RAM.'
+                'Se ha agotado físicamente la memoria Heap disponible en la computadora para los píxeles de la imagen.',
+                'Python posee un límite de seguridad predeterminado (aprox. 1000 llamadas) para la memoria Stack para evitar que un caso base ausente congele el SO.',
+                'El algoritmo no retornó un valor de tipo numérico entero en su ciclo principal.',
+                'La variable de la imagen fue definida globalmente y la función recursiva no tiene permiso para sobreescribirla.'
             ],
             correcta: 1,
-            retro: 'Cada invocación recursiva apila un nuevo "Frame" en la memoria Stack (que guarda variables locales y direcciones de retorno). Sin un caso base alcanzable, las llamadas infinitas agotan esta memoria estrictamente limitada (Stack Overflow).'
+            retro: 'A diferencia de C/C++, Python impone un límite explícito (vía `sys.getrecursionlimit()`) en el tamaño del Call Stack (Pila de llamadas). Si la recursividad es muy profunda (muchos píxeles en la imagen), el intérprete aborta intencionalmente para prevenir un Stack Overflow real.'
         },
         
-        // NIVEL 2: Aplicar y Analizar
+        // NIVEL 2: Aplicar y Analizar Avanzado
         {
             id: 'q4', nivel: 2, tipo: 'radio', pts: 4,
-            contexto: 'Manipulación de Registros ALUs: Procesamiento Digital de un ADC. Un oxímetro entrega su lectura en `PORTB`. Se necesita aplicarle una corrección de offset sumándole `0x05`.',
-            texto: 'Si el firmware ejecuta un `MOVF PORTB, 0` seguido de un `ADDLW 0x05`, ¿qué ocurre físicamente con el registro origen (PORTB) y dónde queda el resultado final?',
+            contexto: 'Ensamblador: Direccionamiento Indirecto. Se requiere transmitir 100 muestras consecutivas de un sensor SpO2 almacenadas a partir de la dirección 0x100.',
+            texto: '¿Qué combinación de registros de control especializados en PIC18F permite leer y avanzar por este bloque de memoria sin usar un ciclo complejo con sumas manuales a punteros?',
             opciones: [
-                'El registro PORTB es sobreescrito con la nueva suma, destruyendo el dato original del sensor.',
-                'El resultado de la suma se aloja temporalmente en la SRAM principal y PORTB se resetea a cero.',
-                'La suma se guarda en el registro de trabajo (W), dejando la lectura original en PORTB intacta para operaciones futuras.',
-                'Se produce un error de sintaxis lógico, ya que ADDLW solo permite operar con otros registros, no literales.'
+                'Cargar la dirección en TMR0 y leer el resultado en INTCON.',
+                'Usar PCLATH para apuntar al registro y leer el contador de programa (PC).',
+                'Cargar 0x100 en FSR0 y leer el dato consecutivamente a través de POSTINC0.',
+                'Escribir la dirección directamente en EEADR y leer desde EEDATA.'
             ],
             correcta: 2,
-            retro: 'El argumento ",0" en MOVF mueve el dato al Acumulador (W). La instrucción ADDLW (Add Literal to W) suma la constante a lo que hay en W y guarda el resultado en W. PORTB jamás se modifica en este flujo.'
+            retro: 'El direccionamiento indirecto usa los File Select Registers (FSR). Al leer el registro virtual `POSTINCn`, el microcontrolador lee el dato de la dirección apuntada por FSRn y luego incrementa automáticamente el puntero, optimizando enormemente el procesamiento de arreglos.'
         },
         {
             id: 'q5', nivel: 2, tipo: 'radio', pts: 4,
-            contexto: 'Sistemas Embebidos Críticos: Detección de paradas cardíacas. Un botón de emergencia está conectado a PORTB, 0.',
-            texto: 'Un diseñador argumenta que es mejor estructurar el monitoreo del botón usando "Polling" con la instrucción `BTFSS PORTB, 0` dentro del bucle principal en lugar de una interrupción de hardware externa. ¿Cuál es el riesgo clínico de este análisis?',
+            contexto: 'Diseño de Hardware Crítico: Gatillado de alarmas por botones (Interrupt-on-change).',
+            texto: 'Un botón de pánico en terapia intensiva está conectado al pin INT0. Al oprimirlo una vez, el contador de la subrutina ISR registra de 3 a 15 disparos casi simultáneos. ¿Qué fenómeno físico justifica esto y cómo se soluciona a nivel de firmware o hardware?',
             opciones: [
-                'No existe ningún riesgo. El Polling mediante BTFSS reacciona en microsegundos independientemente de otras rutinas.',
-                'Las interrupciones consumen más energía en modos Sleep, por lo que el Polling es mandatorio en instrumentación.',
-                'El hardware del PIC18F4550 no permite realizar operaciones Bit-Test (BTFSS) sobre puertos de entrada.',
-                'El Polling monopoliza el CPU. Si el programa principal está atascado en un Delay (ej. actualizando una pantalla LCD), el microcontrolador será "ciego" a la pulsación.'
+                'Fallo de impedancia; se soluciona configurando todo el TRISB como salida.',
+                'Rebote mecánico (Switch Bounce); se mitiga agregando un retardo antirrebote (Debouncing) en software o un filtro RC en hardware.',
+                'Ruido EMI de la red eléctrica (60Hz); requiere apagar el ADC interno usando ADCON1.',
+                'Desbordamiento del TMR0; se soluciona limpiando el flag TMR0IF antes de leer el puerto.'
             ],
-            correcta: 3,
-            retro: 'El "Polling" o sondeo depende de que el Program Counter pase por esa instrucción específica (BTFSS). Si el procesador está ocupado en retardos o rutinas pesadas, ignorará eventos asíncronos. En señales vitales, las interrupciones garantizan atención determinista.'
+            correcta: 1,
+            retro: 'Los contactos metálicos de los interruptores "rebotan" microscópicamente al cerrarse, generando múltiples transiciones de voltaje en milisegundos. Como la interrupción de hardware es ultrarrápida, detecta cada rebote como un evento separado. Requiere Debouncing (software/hardware).'
         },
         {
             id: 'q6', nivel: 2, tipo: 'radio', pts: 4,
-            contexto: 'Ciclos For y Listas (Python): Limpieza de una señal de Electromiografía (EMG). Se tiene un arreglo `emg = [0.1, 4.5, 0.2, 5.2, 0.3]` y se deben eliminar picos de ruido mayores a 3.0 V.',
-            texto: 'Analice el siguiente bloque lógico: `for voltaje in emg: if voltaje > 3.0: emg.remove(voltaje)`. ¿Qué falla de diseño crítico existe en esta implementación?',
+            contexto: 'Python: Manejo eficiente de memoria en Big Data Biológico. Se debe procesar un archivo Holter (ECG) de 15 GB línea por línea.',
+            texto: '¿Por qué la arquitectura de una función generadora (usando `yield`) es vital para este problema frente al uso clásico de iterar y añadir a una lista (usando `.append()` y `return`)?',
             opciones: [
-                'La función remove() espera índices y no valores de punto flotante.',
-                'El uso de if anidado interrumpe asíncronamente el ciclo for.',
-                'Alterar la longitud de una lista mientras el iterador la está recorriendo causa que se desplacen los índices, provocando que se omitan evaluaciones de elementos adyacentes.',
-                'La lista vaciará todos sus elementos porque Python elimina todas las ocurrencias que compartan el mismo tipo de dato flotante.'
+                'Porque `yield` compila el código a nivel de máquina, superando las restricciones del Global Interpreter Lock (GIL).',
+                'Porque las listas en Python no soportan estructuras de datos flotantes mayores a 32 bits.',
+                'Porque `yield` suspende el estado de la función y entrega un valor a la vez, evitando cargar los 15 GB simultáneamente en la RAM.',
+                'Porque previene el Stack Overflow al forzar que la lectura del archivo se haga de forma recursiva.'
             ],
             correcta: 2,
-            retro: 'Es una regla de oro en programación algorítmica: nunca se debe mutar (añadir/eliminar elementos) una estructura de datos dinámica mientras se itera directamente sobre ella. Al remover el "4.5" (índice 1), el "0.2" se recorre al índice 1, pero el For avanza al índice 2, saltándose la lectura del 0.2.'
+            retro: 'Una función con "return [lista]" carga todo el set de datos procesado en la memoria RAM antes de entregarlo. Un generador con "yield" procesa y entrega un solo dato a la vez bajo demanda, siendo la única forma viable de procesar archivos más masivos que la RAM física disponible.'
         },
         
-        // NIVEL 3: Evaluar y Crear
+        // NIVEL 3: Evaluar y Crear Avanzado
         {
             id: 'q7', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Python Avanzado: Visión Computacional Médica. Tiene un diccionario llamado "metricas_ventriculares" con datos clínicos de M-mode (ej. MAPSE: 14mm, TAPSE: 20mm).',
-            texto: 'Escriba exactamente el método estándar de Python utilizado en el ciclo for para desempaquetar simultáneamente las claves y sus valores respectivos en un solo barrido iterativo.',
-            codigoBase: "for indicador, medicion in metricas_ventriculares.________():",
-            respuestaRegex: /items/i,
-            retro: 'El método .items() expone vistas dinámicas de tuplas (clave, valor) en el diccionario, evitando el doble acceso a memoria que implicaría buscar el valor usando la clave iterada.'
+            contexto: 'Python: Extracción y Filtrado con List Comprehensions. Tiene una lista `ecg_raw = [0.1, 1.6, 0.4, 2.1, 0.2]`.',
+            texto: 'Escriba SÓLO el código interior de los corchetes para crear una nueva lista por comprensión que extraiga únicamente los valores (v) que sean mayores a 1.5.',
+            codigoBase: "ecg_limpio = [________]",
+            respuestaEsperada: "v for v in ecg_raw if v > 1.5",
+            respuestaRegex: /v\s*for\s*v\s*in\s*ecg_raw\s*if\s*v\s*>\s*1\.5/i,
+            retro: 'La "List Comprehension" es el método más pythónico y eficiente computacionalmente para mapear y filtrar estructuras. Sintaxis: [expresion for variable in iterable if condicion].'
         },
         {
             id: 'q8', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Condicionales Lógicos (Python): Diagnóstico Automatizado. Una subrutina debe generar alerta SÓLO si la `frecuencia_cardiaca` supera los 120 lpm Y el booleano de `paciente_en_reposo` es Verdadero.',
-            texto: 'Complete la expresión con el operador lógico relacional nativo de Python para la condición de conjunción.',
-            codigoBase: "if frecuencia_cardiaca > 120 ________ paciente_en_reposo == True:",
-            respuestaRegex: /and/i,
-            retro: 'A diferencia de C o Ensamblador donde usaríamos máscaras a nivel de bit o el operador &&, Python abstrae el control de flujo con el operador lógico natural "and".'
+            contexto: 'Ensamblador: Multiplexación Digital. Se requiere leer una botonera conectada a PORTA, pero por defecto, estos pines inician como canales analógicos.',
+            texto: '¿A qué registro especial (SFR) se le debe mover la constante 0x0F (o 0x0E) en el bloque de inicialización para forzar que los pines funcionen como I/O digitales, deshabilitando el ADC?',
+            codigoBase: "MOVLW 0x0F\nMOVWF ________",
+            respuestaEsperada: "ADCON1",
+            respuestaRegex: /adcon1/i,
+            retro: 'En la familia PIC18F, el registro ADCON1 (A/D Control Register 1) gestiona la configuración de los puertos analógicos. Si no se configuran como digitales (0x0F), las lecturas digitales de PORTA siempre retornarán 0 (Cero lógico).'
         },
         {
             id: 'q9', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Ensamblador PIC18F: Direccionamiento I/O. Un sensor infrarrojo de un módulo de glucosa está anclado a TODO el Puerto A. El sistema debe asegurar que el puerto reciba datos, no los emita.',
-            texto: 'Se ha cargado un Literal Hexadecimal (0xFF) en W. Inserte el mnemotécnico requerido para depositar dicho valor en el registro de control de estados lógicos y establecer el puerto como entrada.',
-            codigoBase: "MOVLW 0xFF\n________ TRISA",
-            respuestaRegex: /movwf/i,
-            retro: 'La instrucción MOVWF (Move W to File) es indispensable para escribir sobre SFRs (Special Function Registers). Cargar 1s en los bits de TRISA lo configura enteramente como Entradas.'
+            contexto: 'Operaciones Bit a Bit (Python/C): Análisis de un Registro de Estatus Clínico (8 bits). El bit 3 (índice 2, peso decimal 4) indica batería baja si está en 1.',
+            texto: 'Complete la operación de máscara a nivel de bits (Bitwise AND) para evaluar EXCLUSIVAMENTE si el bit índice 2 de la variable `estado` está encendido.',
+            codigoBase: "if (estado ________ 0b00000100):",
+            respuestaEsperada: "&",
+            respuestaRegex: /&/,
+            retro: 'El operador Bitwise AND ("&") se utiliza para aislar o enmascarar bits específicos. Si "estado" tiene el bit 2 en 1, el resultado de la operación será mayor a cero (Verdadero); si está en 0, el resultado de toda la operación será 0 (Falso).'
         },
         {
             id: 'q10', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Ensamblador PIC18F: Bifurcación Hardware Condicionada. El bit 1 de PORTB detecta oclusión en una bomba de infusión (1 = oclusión, 0 = flujo libre).',
-            texto: 'Complete el mnemotécnico adecuado para TESTEAR específicamente este BIT y lograr que el código "salte" la siguiente instrucción (evitando inyectar medicamento) si la condición de oclusión es afirmativa (bit en 1).',
-            codigoBase: "________ PORTB, 1\nCALL INYECTAR_MEDICAMENTO\nGOTO ALARMA_OCLUSION",
-            respuestaRegex: /btfss/i,
-            retro: 'BTFSS (Bit Test File, Skip if Set) evalúa hardware a nivel de bit sin necesidad de Máscaras AND previas. Es la instrucción más eficiente para lectura rápida de biosensores digitales (Ahorrando tiempo de máquina, 1 ciclo de instrucción).'
+            contexto: 'Ensamblador: Temporización por Hardware (Timer0). El TMR0 ha sido configurado para desbordar cada 1ms, disparando una interrupción.',
+            texto: 'Antes del RETFIE en la rutina de interrupción, ¿Qué bandera ESPECÍFICA dentro del registro INTCON debe ser limpiada obligatoriamente mediante un BCF para evitar bucles infinitos de interrupción?',
+            codigoBase: "BCF INTCON, ________",
+            respuestaEsperada: "TMR0IF",
+            respuestaRegex: /tmr0if/i,
+            retro: 'El flag TMR0IF (Timer0 Overflow Interrupt Flag) se pone a 1 en hardware cuando el temporizador pasa de FF a 00. Si el software no lo regresa a 0, el procesador asumirá que la interrupción sigue pendiente e ingresará a la ISR de manera perpetua.'
         }
     ];
 
-    // --- FUNCIONES DE SOPORTE UI ---
-    const showToast = (msg, type = 'info') => {
-        const bg = type === 'error' ? 'bg-red-500' : (type === 'success' ? 'bg-green-500' : 'bg-blue-500');
-        const icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-        const t = document.createElement('div');
-        t.className = `toast ${bg} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3`;
-        t.innerHTML = `<i class="fas ${icon} text-xl"></i><span class="font-medium">${msg}</span>`;
-        document.getElementById('toast-container').appendChild(t);
-        setTimeout(() => { t.classList.add('hiding'); setTimeout(() => t.remove(), 500); }, 4000);
-    };
-
-    const formatearTiempo = (min, seg) => `${min.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
-
-    const renderPreguntas = () => {
-        const container = document.getElementById('contenedor-preguntas');
-        container.innerHTML = '';
-        state.preguntasActivas.forEach((q, index) => {
-            const nivelBadge = q.nivel === 1 ? '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded border border-blue-200 font-bold tracking-wide"><i class="fas fa-brain mr-1"></i> NIVEL 1: Recordar/Comprender</span>' : 
-                               q.nivel === 2 ? '<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded border border-yellow-200 font-bold tracking-wide"><i class="fas fa-cogs mr-1"></i> NIVEL 2: Aplicar/Analizar</span>' : 
-                               '<span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded border border-purple-200 font-bold tracking-wide"><i class="fas fa-code-branch mr-1"></i> NIVEL 3: Evaluar/Crear</span>';
-            
-            let html = `
-            <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2 border-b border-gray-100 pb-3">
-                    <h3 class="text-lg font-bold text-gray-800">Reactivo ${index + 1} <span class="text-gray-400 text-sm ml-2 font-normal">Valor: ${q.pts} puntos</span></h3>
-                    ${nivelBadge}
-                </div>
-                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 mb-5 text-indigo-900 text-sm italic shadow-inner">
-                    <i class="fas fa-laptop-code text-indigo-400 mr-2"></i> <strong>Escenario Clínico/Ingenieril:</strong> ${q.contexto}
-                </div>
-                <p class="text-gray-800 font-medium mb-5 text-base leading-relaxed">${q.texto}</p>
-            `;
-
-            if(q.tipo === 'radio') {
-                html += `<div class="space-y-3">`;
-                q.opciones.forEach((opc, i) => {
-                    html += `
-                    <label class="flex items-start p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group">
-                        <input type="radio" name="${q.id}" value="${i}" class="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300 mt-0.5">
-                        <span class="ml-3 text-gray-700 group-hover:text-blue-900">${opc}</span>
-                    </label>`;
-                });
-                html += `</div>`;
-            } else if (q.tipo === 'codigo') {
-                const partes = q.codigoBase.split('________');
-                html += `
-                <div class="bg-gray-900 p-5 rounded-lg overflow-x-auto mt-2 shadow-inner border border-gray-700 flex flex-wrap items-center">
-                    <code class="code-font text-green-400 whitespace-pre-wrap">${q.codigoBase.includes('________') ? partes[0] : ''}</code>
-                    <input type="text" id="${q.id}" class="code-font bg-gray-800 text-white border-b-2 border-green-500 focus:outline-none focus:border-blue-400 px-3 py-1 mx-2 text-center my-2 text-lg min-w-[100px] w-auto max-w-xs" placeholder="[código]" autocomplete="off" spellcheck="false">
-                    <code class="code-font text-green-400 whitespace-pre-wrap">${q.codigoBase.includes('________') ? partes[1] : ''}</code>
-                </div>`;
-            }
-            html += `</div>`;
-            container.innerHTML += html;
-        });
-    };
-
-    // --- API PÚBLICA DEL MÓDULO ---
     return {
         iniciar: () => {
             const nom = document.getElementById('alumno-nombre').value.trim();
@@ -313,7 +257,7 @@ const app = (function() {
                 if(document.hidden && !document.getElementById('vista-examen').classList.contains('hidden')) {
                     state.seguridad.salidas++;
                     document.getElementById('display-warnings').innerHTML = `<i class="fas fa-exclamation-triangle"></i> Infracciones: ${state.seguridad.salidas}`;
-                    showToast("⚠️ INFRACCIÓN: Abandono de pestaña detectado. Este evento será notificado al profesor.", "error");
+                    showToast("⚠️ INFRACCIÓN: Abandono de pestaña detectado. Este evento será notificado al profesorado.", "error");
                 }
             });
 
@@ -326,11 +270,11 @@ const app = (function() {
 
             renderPreguntas();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            showToast("Evaluación iniciada. ¡Mucho éxito futuro Ingeniero!", "success");
+            showToast("Evaluación iniciada. ¡Demuestra tu arquitectura lógica!", "success");
         },
 
         entregar: () => {
-            if(!confirm("¿Está seguro de enviar su evaluación? No podrá modificar sus respuestas.")) return;
+            if(!confirm("¿Está seguro de enviar su evaluación? Asegúrese de revisar la sintaxis de sus respuestas de código.")) return;
 
             clearInterval(state.seguridad.intervaloTimer);
             let score = 0;
@@ -339,12 +283,20 @@ const app = (function() {
 
             state.preguntasActivas.forEach(q => {
                 let esCorrecto = false;
+                let respuestaUsuarioTexto = "";
+                let respuestaCorrectaTexto = "";
                 
                 if(q.tipo === 'radio') {
                     const select = document.querySelector(`input[name="${q.id}"]:checked`);
+                    respuestaUsuarioTexto = select ? q.opciones[parseInt(select.value)] : "Sin responder";
+                    respuestaCorrectaTexto = q.opciones[q.correcta];
+                    
                     if(select && parseInt(select.value) === q.correcta) esCorrecto = true;
                 } else if(q.tipo === 'codigo') {
                     const rawAns = document.getElementById(q.id).value;
+                    respuestaUsuarioTexto = rawAns.trim() || "Sin responder";
+                    respuestaCorrectaTexto = q.respuestaEsperada;
+                    
                     const ansClean = rawAns.replace(/\s+/g, '').toLowerCase(); 
                     if(q.respuestaRegex.test(ansClean)) esCorrecto = true;
                 }
@@ -352,15 +304,27 @@ const app = (function() {
                 if(esCorrecto) {
                     score += q.pts;
                 } else {
-                    if(q.nivel === 1) stepGrade.funcionalidad.push(q.retro);
-                    else if(q.nivel === 2) stepGrade.calidad.push(q.retro);
-                    else stepGrade.eficiencia.push(q.retro);
+                    // BLOQUE DE RETROALIMENTACIÓN DETALLADA
+                    const errorDetalle = `
+                        <div class="mb-4 bg-white p-5 rounded-lg border border-gray-200 shadow-sm text-sm">
+                            <p class="font-bold text-gray-800 mb-3">${q.texto}</p>
+                            <div class="space-y-2 mb-3 bg-gray-50 p-3 rounded border border-gray-100">
+                                <p class="text-red-600"><i class="fas fa-times-circle mr-1"></i><strong>Tu respuesta:</strong> <span class="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">${respuestaUsuarioTexto}</span></p>
+                                <p class="text-green-600"><i class="fas fa-check-circle mr-1"></i><strong>Respuesta correcta:</strong> <span class="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">${respuestaCorrectaTexto}</span></p>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed"><i class="fas fa-lightbulb text-yellow-500 mr-1"></i><strong>Justificación Técnica:</strong> ${q.retro}</p>
+                        </div>
+                    `;
+                    
+                    if(q.nivel === 1) stepGrade.funcionalidad.push(errorDetalle);
+                    else if(q.nivel === 2) stepGrade.calidad.push(errorDetalle);
+                    else stepGrade.eficiencia.push(errorDetalle);
                 }
             });
 
             const porcentaje = (score / maxScore) * 100;
             let rango = ""; let claseRango = "";
-            if(porcentaje >= 85) { rango = "🏆 Arquitecto de Dispositivos Médicos (Sobresaliente)"; claseRango = "text-green-600"; }
+            if(porcentaje >= 85) { rango = "🏆 Arquitecto de Firmware (Sobresaliente)"; claseRango = "text-green-600"; }
             else if(porcentaje >= 60) { rango = "🛠️ Ingeniero Embebido (Aceptable)"; claseRango = "text-blue-600"; }
             else { rango = "🌱 Analista Junior (Requiere Repaso Técnico)"; claseRango = "text-red-600"; }
 
@@ -368,8 +332,8 @@ const app = (function() {
             const repo = document.getElementById('reporte-contenido');
             
             repo.innerHTML = `
-                <div class="border-4 border-gray-800 p-6 md:p-10 rounded-xl relative bg-white">
-                    <div class="absolute top-0 right-0 bg-gray-800 text-white px-4 py-1 rounded-bl-xl font-bold text-xs tracking-wider">REPORTE OFICIAL</div>
+                <div class="border-4 border-gray-800 p-6 md:p-10 rounded-xl relative bg-white shadow-xl">
+                    <div class="absolute top-0 right-0 bg-gray-800 text-white px-4 py-1 rounded-bl-xl font-bold text-xs tracking-wider">REPORTE TÉCNICO OFICIAL</div>
                     
                     <h2 class="text-2xl md:text-3xl font-black mb-6 text-gray-800 border-b-2 border-gray-200 pb-3">Diagnóstico de Desempeño Clínico/Técnico</h2>
                     
@@ -386,33 +350,33 @@ const app = (function() {
                         <p class="text-xl font-bold ${claseRango}">${rango}</p>
                     </div>
 
-                    <h3 class="text-xl font-bold text-gray-800 mb-5 flex items-center"><i class="fas fa-layer-group text-blue-500 mr-3"></i> Áreas de Oportunidad (Rúbrica Biomédica)</h3>
-                    <div class="space-y-5">
+                    <h3 class="text-xl font-bold text-gray-800 mb-5 flex items-center"><i class="fas fa-layer-group text-blue-500 mr-3"></i> Áreas de Oportunidad y Análisis de Errores</h3>
+                    <div class="space-y-6">
                         
-                        <div class="p-5 border-l-4 border-blue-500 bg-blue-50/50 rounded-r-lg">
-                            <h4 class="font-bold text-blue-800 mb-3 text-lg">1. Lógica Funcional y Comprensión (Conceptos Base)</h4>
-                            <ul class="list-disc pl-6 text-gray-700 space-y-2">
-                                ${stepGrade.funcionalidad.length > 0 ? stepGrade.funcionalidad.map(r => `<li>${r}</li>`).join('') : '<li class="text-green-700 font-medium"><i class="fas fa-check-circle mr-1"></i>Excelente. Estructuras de datos y arquitectura del hardware plenamente asimiladas.</li>'}
-                            </ul>
+                        <div class="p-5 border-l-4 border-blue-500 bg-blue-50/30 rounded-r-lg shadow-sm">
+                            <h4 class="font-bold text-blue-800 mb-4 text-lg border-b border-blue-200 pb-2">1. Estructura y Conceptos Base</h4>
+                            ${stepGrade.funcionalidad.length > 0 ? 
+                                stepGrade.funcionalidad.join('') : 
+                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Excelente. Estructuras de datos y arquitectura de memoria asimiladas a la perfección.</p>'}
                         </div>
 
-                        <div class="p-5 border-l-4 border-yellow-500 bg-yellow-50/50 rounded-r-lg">
-                            <h4 class="font-bold text-yellow-800 mb-3 text-lg">2. Aplicación y Análisis Crítico (Escenarios de Fallo)</h4>
-                            <ul class="list-disc pl-6 text-gray-700 space-y-2">
-                                ${stepGrade.calidad.length > 0 ? stepGrade.calidad.map(r => `<li>${r}</li>`).join('') : '<li class="text-green-700 font-medium"><i class="fas fa-check-circle mr-1"></i>Óptimo. Criterio impecable para detectar cuellos de botella y fallos en sistemas de instrumentación críticos.</li>'}
-                            </ul>
+                        <div class="p-5 border-l-4 border-yellow-500 bg-yellow-50/30 rounded-r-lg shadow-sm">
+                            <h4 class="font-bold text-yellow-800 mb-4 text-lg border-b border-yellow-200 pb-2">2. Aplicación Práctica y Manejo de Errores (Hardware/Software)</h4>
+                            ${stepGrade.calidad.length > 0 ? 
+                                stepGrade.calidad.join('') : 
+                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Óptimo. Sólido criterio para identificar fallas en entornos de ejecución críticos.</p>'}
                         </div>
 
-                        <div class="p-5 border-l-4 border-purple-500 bg-purple-50/50 rounded-r-lg">
-                            <h4 class="font-bold text-purple-800 mb-3 text-lg">3. Síntesis y Optimización (Desarrollo Directo)</h4>
-                            <ul class="list-disc pl-6 text-gray-700 space-y-2">
-                                ${stepGrade.eficiencia.length > 0 ? stepGrade.eficiencia.map(r => `<li>${r}</li>`).join('') : '<li class="text-green-700 font-medium"><i class="fas fa-check-circle mr-1"></i>Sobresaliente. Dominio mnemotécnico y algorítmico avanzado para diseño de firmware clínico.</li>'}
-                            </ul>
+                        <div class="p-5 border-l-4 border-purple-500 bg-purple-50/30 rounded-r-lg shadow-sm">
+                            <h4 class="font-bold text-purple-800 mb-4 text-lg border-b border-purple-200 pb-2">3. Síntesis, Optimización y Registros</h4>
+                            ${stepGrade.eficiencia.length > 0 ? 
+                                stepGrade.eficiencia.join('') : 
+                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Sobresaliente. Dominio mnemotécnico superior y gran eficiencia en la lógica de programación.</p>'}
                         </div>
                     </div>
 
                     <div class="mt-10 p-4 bg-gray-100 text-gray-500 rounded-lg text-center print-only text-xs uppercase tracking-wider font-semibold">
-                        Documento generado automáticamente por sistema. ID: ${Date.now().toString(16).toUpperCase()}
+                        Documento generado automáticamente por el sistema. ID Auditoría: ${Date.now().toString(16).toUpperCase()}
                     </div>
                 </div>
             `;
@@ -435,9 +399,9 @@ const app = (function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             }).then(() => {
-                showToast("✅ Resultados sincronizados exitosamente con el Profesorado.", "success");
+                showToast("✅ Resultados sincronizados en la bitácora docente.", "success");
             }).catch(e => {
-                showToast("Fallo de red. Descargue su PDF como respaldo y envíelo a la coordinación.", "error");
+                showToast("Fallo de red. Descargue su PDF de respaldo.", "error");
             });
         }
     };

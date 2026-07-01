@@ -32,8 +32,8 @@
         <div id="app-card" class="bg-white rounded-xl shadow-lg w-full max-w-5xl p-6 md:p-10 transition-all duration-300">
             
             <div class="text-center mb-8 border-b pb-4">
-                <h1 class="text-2xl md:text-3xl font-bold text-blue-800">Evaluación Parcial: Microcontroladores y Computación</h1>
-                <p class="text-gray-500 mt-2">Departamento de Ingeniería Biomédica | Universidad Modelo</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-blue-800">Evaluación Parcial: Microcontroladores y Computación Base 100</h1>
+                <p class="text-gray-500 mt-2">Departamento de Ingeniería Biomédica | Universidad Modelo & UNAM</p>
                 <div id="examen-meta" class="hidden mt-4 flex flex-wrap justify-center gap-4 md:gap-6 text-sm font-semibold text-gray-600 bg-gray-50 p-3 rounded-lg">
                     <span id="display-serie"><i class="fas fa-file-alt text-blue-500"></i> Serie: -</span>
                     <span id="display-time"><i class="fas fa-clock text-green-500"></i> Tiempo: 00:00</span>
@@ -48,9 +48,9 @@
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
                                 <strong>Reglas de Integridad (Obligatorias):</strong><br>
-                                1. Al presionar comenzar, el sistema registrará si abandona esta pestaña.<br>
-                                2. Está prohibido el uso de herramientas de IA. El examen evalúa razonamiento algorítmico, no memorización.<br>
-                                3. La prueba consta de casos prácticos clínicos con niveles de complejidad progresiva.
+                                1. La evaluación consta de 33 reactivos de 3 puntos cada uno (99 pts) + 1 punto base de formato.<br>
+                                2. Al presionar comenzar, el sistema registrará si abandona esta pestaña.<br>
+                                3. Evalúa hardware PIC18F y Python enfocados en bioseñales, AI y clínica.
                             </p>
                         </div>
                     </div>
@@ -101,7 +101,6 @@
 
 <script>
 const app = (function() {
-    // --- CONFIGURACIÓN DEL BACKEND ---
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQFilJTBT7_qBDXlThxC89VYeOY0Gt8hCqIoGkqBMPHog_GIra4cYJ2gYJZtPO1JCY/exec';
 
     const state = {
@@ -110,126 +109,396 @@ const app = (function() {
         preguntasActivas: []
     };
 
-    // BANCO DE PREGUNTAS - ALTA DIFICULTAD
+    // BANCO DE 33 PREGUNTAS (Base 100 con 1 pt de regalo)
     const bancoMaestro = [
-        // NIVEL 1: Recordar y Comprender Avanzado
         {
-            id: 'q1', nivel: 1, tipo: 'radio', pts: 4,
-            contexto: 'Python: Gestión de Memoria en Estructuras Clínicas. Se tiene un diccionario "paciente_a" con una lista anidada de medicamentos. Se realiza la asignación `paciente_b = paciente_a.copy()`.',
-            texto: 'Si posteriormente se modifica la lista de medicamentos dentro de `paciente_b`, ¿qué ocurre con los datos de `paciente_a`?',
+            id: 'q1', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Estructuras Python: Extracción de características de pacientes (ej. Milo, Shaka) en diccionarios para análisis clínico.',
+            texto: '¿Qué característica define la manera en que un diccionario organiza la información clínica frente a una lista secuencial?',
             opciones: [
-                'Permanecen inalterados, ya que el método .copy() genera instancias completamente independientes en memoria.',
-                'Se modifican también, porque .copy() crea una copia superficial (shallow copy) copiando la referencia del objeto anidado, no sus valores.',
-                'Lanza un error en tiempo de ejecución debido a un bloqueo de mutabilidad sobre diccionarios clonados.',
-                'Python automáticamente convierte la lista anidada en una tupla para proteger la integridad del dato original.'
+                'Usa arreglos unidimensionales estáticos y de tamaño inmutable.',
+                'Almacena pares de elementos en forma de clave-valor, permitiendo acceder rápidamente sin índices numéricos.',
+                'Itera todos los registros para encontrar el dato más reciente.',
+                'Ordena automáticamente la información alfabéticamente al declararse.'
             ],
             correcta: 1,
-            retro: 'El método .copy() nativo de diccionarios realiza una "Shallow Copy". Clona el primer nivel, pero los objetos mutables anidados (como listas) siguen apuntando al mismo espacio de memoria RAM. Para clonar todo, se debe usar `copy.deepcopy()`.'
+            retro: 'A diferencia de las listas, un diccionario es una estructura de datos que almacena pares de elementos en forma de clave-valor[cite: 4].'
         },
         {
-            id: 'q2', nivel: 1, tipo: 'radio', pts: 4,
-            contexto: 'Microcontroladores: Salvaguarda de Contexto (Context Saving) en PIC18F.',
-            texto: 'Al ocurrir una interrupción de ALTA prioridad en la arquitectura PIC18F, ¿por qué NO es estrictamente necesario escribir rutinas en software para salvar registros como W, STATUS y BSR antes de ejecutar la ISR?',
+            id: 'q2', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Firmware: Monitor supervisado por el Dr. Jorge. Se genera una alerta crítica a través de hardware.',
+            texto: 'Dentro de la ISR (Subrutina de Interrupción), ¿qué mnemotécnico es mandatorio utilizar para finalizarla y permitir que el programa principal retome su flujo?',
             opciones: [
-                'Porque el PIC18F transfiere temporalmente toda la RAM de acceso al bloque EEPROM.',
-                'Porque el compilador siempre inyecta automáticamente las instrucciones MOVFF al inicio de toda ISR, sin importar la prioridad.',
-                'Porque el hardware transfiere automáticamente esos 3 registros al Fast Register Stack (Shadow Registers) en 1 ciclo de instrucción.',
-                'Porque las interrupciones de alta prioridad suspenden el ciclo de reloj (Clock), congelando el estado de la ALU.'
+                'GOTO MAIN',
+                'RETURN',
+                'RETFIE',
+                'END'
             ],
             correcta: 2,
-            retro: 'La arquitectura PIC18F incluye "Shadow Registers" (Fast Register Stack). Ante un vector de alta prioridad (0x0008), el hardware respalda automáticamente W, STATUS y BSR. Esto permite responder inmediatamente a eventos críticos en bioseñales sin perder tiempo de instrucción.'
+            retro: 'Las rutinas de interrupción de hardware exigen el mnemotécnico RETFIE para devolver el control al código principal[cite: 7].'
         },
         {
-            id: 'q3', nivel: 1, tipo: 'radio', pts: 4,
-            contexto: 'Python: Segmentación recursiva (Region Growing) para delimitar ventrículos en imágenes M-Mode.',
-            texto: 'El algoritmo recursivo implementado arroja el error `RecursionError: maximum recursion depth exceeded`. Considerando la arquitectura de Python, ¿cuál es el motivo principal de este colapso?',
+            id: 'q3', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Algoritmos: Delineado de ventrículos. El algoritmo se invoca a sí mismo sobre subdivisiones de la imagen.',
+            texto: 'En una función recursiva, ¿qué condición estructural evita que el sistema operativo se bloquee por llamadas infinitas?',
             opciones: [
-                'Se ha agotado físicamente la memoria Heap disponible en la computadora para los píxeles de la imagen.',
-                'Python posee un límite de seguridad predeterminado (aprox. 1000 llamadas) para la memoria Stack para evitar que un caso base ausente congele el SO.',
-                'El algoritmo no retornó un valor de tipo numérico entero en su ciclo principal.',
-                'La variable de la imagen fue definida globalmente y la función recursiva no tiene permiso para sobreescribirla.'
+                'La declaración de un bucle While interno.',
+                'Definir un caso base o condición de parada donde la función ya no debe volver a llamarse a sí misma.',
+                'Limpiar el buffer de memoria usando recolectores de basura.',
+                'Pasar siempre variables por valor y no por referencia.'
             ],
             correcta: 1,
-            retro: 'A diferencia de C/C++, Python impone un límite explícito (vía `sys.getrecursionlimit()`) en el tamaño del Call Stack (Pila de llamadas). Si la recursividad es muy profunda (muchos píxeles en la imagen), el intérprete aborta intencionalmente para prevenir un Stack Overflow real.'
+            retro: 'Todo enfoque recursivo requiere definir el caso base, que es el caso más simple del problema, donde la función ya no debe volver a llamarse a sí misma[cite: 1].'
         },
-        
-        // NIVEL 2: Aplicar y Analizar Avanzado
         {
-            id: 'q4', nivel: 2, tipo: 'radio', pts: 4,
-            contexto: 'Ensamblador: Direccionamiento Indirecto. Se requiere transmitir 100 muestras consecutivas de un sensor SpO2 almacenadas a partir de la dirección 0x100.',
-            texto: '¿Qué combinación de registros de control especializados en PIC18F permite leer y avanzar por este bloque de memoria sin usar un ciclo complejo con sumas manuales a punteros?',
+            id: 'q4', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Hardware: Interrupciones en el prototipo de Toronto (EMBC 2026).',
+            texto: 'Si una interrupción ocurre pero el microcontrolador vuelve a entrar al ISR indefinidamente, ¿qué instrucción de software probablemente se omitió antes de salir?',
             opciones: [
-                'Cargar la dirección en TMR0 y leer el resultado en INTCON.',
-                'Usar PCLATH para apuntar al registro y leer el contador de programa (PC).',
-                'Cargar 0x100 en FSR0 y leer el dato consecutivamente a través de POSTINC0.',
-                'Escribir la dirección directamente en EEADR y leer desde EEDATA.'
+                'BCF INTCON, INT0IF',
+                'BSF RCON, IPEN',
+                'MOVLW 00H',
+                'BTG PORTD, 0'
             ],
-            correcta: 2,
-            retro: 'El direccionamiento indirecto usa los File Select Registers (FSR). Al leer el registro virtual `POSTINCn`, el microcontrolador lee el dato de la dirección apuntada por FSRn y luego incrementa automáticamente el puntero, optimizando enormemente el procesamiento de arreglos.'
+            correcta: 0,
+            retro: 'Si no se limpian las banderas de interrupción (como el comando BCF INTCON, INT0IF), el hardware asume que el evento sigue pendiente[cite: 7].'
         },
         {
-            id: 'q5', nivel: 2, tipo: 'radio', pts: 4,
-            contexto: 'Diseño de Hardware Crítico: Gatillado de alarmas por botones (Interrupt-on-change).',
-            texto: 'Un botón de pánico en terapia intensiva está conectado al pin INT0. Al oprimirlo una vez, el contador de la subrutina ISR registra de 3 a 15 disparos casi simultáneos. ¿Qué fenómeno físico justifica esto y cómo se soluciona a nivel de firmware o hardware?',
+            id: 'q5', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Listas: Preprocesamiento de un tensor de señales EMG.',
+            texto: 'Si tenemos la lista `señales = [4.5, 2.1, 8.3, 1.1]` y queremos acceder al valor 4.5, ¿qué índice utilizamos?',
             opciones: [
-                'Fallo de impedancia; se soluciona configurando todo el TRISB como salida.',
-                'Rebote mecánico (Switch Bounce); se mitiga agregando un retardo antirrebote (Debouncing) en software o un filtro RC en hardware.',
-                'Ruido EMI de la red eléctrica (60Hz); requiere apagar el ADC interno usando ADCON1.',
-                'Desbordamiento del TMR0; se soluciona limpiando el flag TMR0IF antes de leer el puerto.'
+                'señales[1]',
+                'señales[0]',
+                'señales["inicio"]',
+                'señales[-1]'
             ],
             correcta: 1,
-            retro: 'Los contactos metálicos de los interruptores "rebotan" microscópicamente al cerrarse, generando múltiples transiciones de voltaje en milisegundos. Como la interrupción de hardware es ultrarrápida, detecta cada rebote como un evento separado. Requiere Debouncing (software/hardware).'
+            retro: 'Para acceder a los elementos del arreglo se hace por medio del índice, donde el índice 0 es el primer elemento[cite: 2].'
         },
         {
-            id: 'q6', nivel: 2, tipo: 'radio', pts: 4,
-            contexto: 'Python: Manejo eficiente de memoria en Big Data Biológico. Se debe procesar un archivo Holter (ECG) de 15 GB línea por línea.',
-            texto: '¿Por qué la arquitectura de una función generadora (usando `yield`) es vital para este problema frente al uso clásico de iterar y añadir a una lista (usando `.append()` y `return`)?',
+            id: 'q6', nivel: 2, tipo: 'codigo', pts: 3,
+            contexto: 'PIC18F Lógica Clic: Dispositivo de tracking de gimnasio para evaluar fuerza.',
+            texto: 'Escriba la instrucción de ensamblador requerida para SALTARSE (Skip) la siguiente línea de código si el bit 0 de PORTB está en "1" (Set).',
+            codigoBase: "________ PORTB, 0\nGOTO APAGA",
+            respuestaEsperada: "BTFSS",
+            respuestaRegex: /btfss/i,
+            retro: 'El mnemotécnico BTFSS evalúa si el bit está en 1. Si está oprimido, salta la siguiente instrucción (ej. GOTO APAGA)[cite: 8].'
+        },
+        {
+            id: 'q7', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'Python Diccionarios: Extracción automática de métricas (MAPSE y TAPSE).',
+            texto: 'Complete el método nativo que permite al ciclo iterar obteniendo la clave y el valor simultáneamente.',
+            codigoBase: "for clave, valor in paciente.________():",
+            respuestaEsperada: "items",
+            respuestaRegex: /items/i,
+            retro: 'Podemos recorrer los valores con un ciclo for desempaquetándolos gracias al método .items() de los diccionarios[cite: 4].'
+        },
+        {
+            id: 'q8', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F ALU: Procesamiento de suma dinámica en RAM.',
+            texto: '¿Qué ocurre con el dato resultante si se ejecuta la instrucción `ADDWF VAR1, 0`?',
             opciones: [
-                'Porque `yield` compila el código a nivel de máquina, superando las restricciones del Global Interpreter Lock (GIL).',
-                'Porque las listas en Python no soportan estructuras de datos flotantes mayores a 32 bits.',
-                'Porque `yield` suspende el estado de la función y entrega un valor a la vez, evitando cargar los 15 GB simultáneamente en la RAM.',
-                'Porque previene el Stack Overflow al forzar que la lectura del archivo se haga de forma recursiva.'
+                'Se sobreescribe la variable VAR1 con el nuevo valor.',
+                'El resultado es puesto en W, conservando el valor original de VAR1 intacto.',
+                'La suma se descarta si hay desbordamiento.',
+                'Genera un error porque ADDWF solo acepta literales numéricas.'
+            ],
+            correcta: 1,
+            retro: 'ADDWF suma un registro ingresado con W. El resultado puede ser almacenado en W si se selecciona el argumento d como 0[cite: 9].'
+        },
+        {
+            id: 'q9', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F ALU: Corrección de offset de +2 en un ADC.',
+            texto: 'Si el microcontrolador debe sumar siempre una constante numérica exacta al acumulador W, ¿qué instrucción debe usarse?',
+            opciones: [
+                'ADDWF 02H',
+                'ADDLW 02H',
+                'MOVLW 02H',
+                'BTG 02H'
+            ],
+            correcta: 1,
+            retro: 'El comando ADDLW suma una literal o número que ingresemos directamente con el registro W[cite: 10].'
+        },
+        {
+            id: 'q10', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'Python Condicionales: Sistema diagnóstico de Dr. Raul Chiu.',
+            texto: 'Escriba el operador lógico que permite verificar si se cumplen DOS condiciones booleanas al mismo tiempo en un IF.',
+            codigoBase: "if edad>=18 ________ licencia_conducir==True:",
+            respuestaEsperada: "and",
+            respuestaRegex: /and/i,
+            retro: 'La evaluación compuesta requiere el uso del operador "and" para confirmar que ambas premisas son verdaderas simultáneamente[cite: 3].'
+        },
+        {
+            id: 'q11', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Listas: Filtrado de ruido en bioseñales SIPAIM.',
+            texto: 'Si utilizamos el comando `.remove(10)` en una lista con datos `[10, 9, 8, 7, 10]`, ¿cuál es el estado final de la lista?',
+            opciones: [
+                '[9, 8, 7]',
+                '[9, 8, 7, 10]',
+                '[10, 9, 8, 7]',
+                'Lanza un error de índice.'
+            ],
+            correcta: 1,
+            retro: 'El método .remove elimina únicamente el primer 10 que encuentre en el barrido secuencial[cite: 2].'
+        },
+        {
+            id: 'q12', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Inicialización: Preparativos para el evento "De Ingeniero a Empresario".',
+            texto: 'Si un arreglo de botones está conectado físicamente a PORTB, ¿qué dato debe enviarse a TRISB para configurarlo totalmente como entrada?',
+            opciones: [
+                '0x00 (B\'00000000\')',
+                '0xFF (B\'11111111\')',
+                'ADCON1',
+                'PORTA'
+            ],
+            correcta: 1,
+            retro: 'Para configurar un puerto entero como entrada en la inicialización, se carga la literal de unos (B\'11111111\') y se mueve al TRIS correspondiente[cite: 9].'
+        },
+        {
+            id: 'q13', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Ciclos: Extracción multimodal de características de audio.',
+            texto: '¿Qué estructura de control permite recorrer y extraer eficientemente el valor de cada elemento de una lista de parámetros extraídos?',
+            opciones: [
+                'if / else',
+                'for x in lista',
+                'while(1)',
+                'def funcion()'
+            ],
+            correcta: 1,
+            retro: 'El ciclo for permite que una variable iteradora tome el valor de cada elemento de la lista en cada repetición[cite: 5].'
+        },
+        {
+            id: 'q14', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Iteradores: Indexado de tiempos M-Mode.',
+            texto: 'Si se define `range(1, 6)`, ¿qué números procesará internamente el motor iterativo?',
+            opciones: [
+                '1, 2, 3, 4, 5, 6',
+                '0, 1, 2, 3, 4, 5, 6',
+                '1, 2, 3, 4, 5',
+                '0, 1, 2, 3, 4, 5'
             ],
             correcta: 2,
-            retro: 'Una función con "return [lista]" carga todo el set de datos procesado en la memoria RAM antes de entregarlo. Un generador con "yield" procesa y entrega un solo dato a la vez bajo demanda, siendo la única forma viable de procesar archivos más masivos que la RAM física disponible.'
-        },
-        
-        // NIVEL 3: Evaluar y Crear Avanzado
-        {
-            id: 'q7', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Python: Extracción y Filtrado con List Comprehensions. Tiene una lista `ecg_raw = [0.1, 1.6, 0.4, 2.1, 0.2]`.',
-            texto: 'Escriba SÓLO el código interior de los corchetes para crear una nueva lista por comprensión que extraiga únicamente los valores (v) que sean mayores a 1.5.',
-            codigoBase: "ecg_limpio = [________]",
-            respuestaEsperada: "v for v in ecg_raw if v > 1.5",
-            respuestaRegex: /v\s*for\s*v\s*in\s*ecg_raw\s*if\s*v\s*>\s*1\.5/i,
-            retro: 'La "List Comprehension" es el método más pythónico y eficiente computacionalmente para mapear y filtrar estructuras. Sintaxis: [expresion for variable in iterable if condicion].'
+            retro: 'Al especificar un inicio y un fin, el rango genera números desde el límite inferior hasta un entero antes del límite superior (el 6 no se incluye)[cite: 5].'
         },
         {
-            id: 'q8', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Ensamblador: Multiplexación Digital. Se requiere leer una botonera conectada a PORTA, pero por defecto, estos pines inician como canales analógicos.',
-            texto: '¿A qué registro especial (SFR) se le debe mover la constante 0x0F (o 0x0E) en el bloque de inicialización para forzar que los pines funcionen como I/O digitales, deshabilitando el ADC?',
+            id: 'q15', nivel: 2, tipo: 'codigo', pts: 3,
+            contexto: 'Python Listas: Base de datos de Deep Learning.',
+            texto: 'Se requiere añadir una nueva imagen segmentada de la UNAM al repositorio. Escriba el método de lista adecuado.',
+            codigoBase: "repositorio_imagenes.________(nueva_imagen)",
+            respuestaEsperada: "append",
+            respuestaRegex: /append/i,
+            retro: 'Se puede agregar un nuevo elemento al final de la lista preexistente haciendo uso del método .append[cite: 2].'
+        },
+        {
+            id: 'q16', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'PIC18F Direccionamiento: Lectura de sensor analógico.',
+            texto: 'Para enviar la lectura que existe en el PORTB al registro de trabajo (W), ¿qué valor debe tener el argumento `d` en el mnemotécnico MOVF?',
+            codigoBase: "MOVF PORTB, ________",
+            respuestaEsperada: "0",
+            respuestaRegex: /0/,
+            retro: 'MOVF mueve el byte contenido en un registro a W, siempre y cuando se seleccione el argumento D como 0[cite: 9].'
+        },
+        {
+            id: 'q17', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Control Básico: Módulo de fototerapia.',
+            texto: 'El programa principal de un microcontrolador siempre debe evitar terminar su ejecución por diseño. ¿Cómo se logra esto en Ensamblador?',
+            opciones: [
+                'Ejecutando un RETFIE final.',
+                'Utilizando un GOTO que apunte a la misma etiqueta principal, creando un ciclo infinito.',
+                'Apagando los registros TRIS.',
+                'Limpiando el TMR0IF.'
+            ],
+            correcta: 1,
+            retro: 'La creación de la rutina "LED" seguida inmediatamente de un "GOTO LED" establece el bucle ininterrumpido necesario para operar hardware continuo[cite: 6].'
+        },
+        {
+            id: 'q18', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'Python Diccionarios: Mutabilidad.',
+            texto: 'Modifique el valor de la temperatura en el diccionario a 38.0 escribiendo la estructura de asignación de clave correcta.',
+            codigoBase: "paciente________ = 38.0",
+            respuestaEsperada: "[\"temperatura\"]",
+            respuestaRegex: /\[(\"|\')temperatura(\"|\')\]/i,
+            retro: 'Para modificar un elemento específico se accede referenciando la clave exacta entre corchetes para reescribir su valor asociado[cite: 4].'
+        },
+        {
+            id: 'q19', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Hardware: Dispositivos de interrupción.',
+            texto: '¿Qué registro y bit son fundamentales configurar para que el procesador respete la jerarquía de interrupciones de alta y baja prioridad?',
+            opciones: [
+                'TRISB y PORTB.',
+                'T0CON y TMR0H.',
+                'ADCON1.',
+                'RCON y su bit IPEN.'
+            ],
+            correcta: 3,
+            retro: 'El comando BSF RCON, IPEN es el responsable de habilitar a nivel arquitectónico el trabajo con prioridades de interrupción[cite: 7].'
+        },
+        {
+            id: 'q20', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Recursividad: Procesamiento iterativo de matrices de atención Transformer.',
+            texto: 'Si diseñamos una función `factorial(n)`, ¿cuál sería el corazón o la instrucción esencial que le da su naturaleza recursiva?',
+            opciones: [
+                'return factorial(n - 1)',
+                'for i in range(n):',
+                'if n == 0:',
+                'lista.append(n)'
+            ],
+            correcta: 0,
+            retro: 'La invocación recursiva ocurre cuando la función se llama a sí misma dentro del bloque ejecutable, permitiendo fraccionar el cálculo[cite: 1].'
+        },
+        {
+            id: 'q21', nivel: 2, tipo: 'codigo', pts: 3,
+            contexto: 'PIC18F Puertos Analógicos vs Digitales: Compatibilidad de sensores I/O.',
+            texto: 'Para leer botones sin interferencia analógica, se debe cargar el literal 0x0F al bloque ADC. Escriba el registro destino.',
             codigoBase: "MOVLW 0x0F\nMOVWF ________",
             respuestaEsperada: "ADCON1",
             respuestaRegex: /adcon1/i,
-            retro: 'En la familia PIC18F, el registro ADCON1 (A/D Control Register 1) gestiona la configuración de los puertos analógicos. Si no se configuran como digitales (0x0F), las lecturas digitales de PORTA siempre retornarán 0 (Cero lógico).'
+            retro: 'Configurar ADCON1 con B\'00001111\' (0x0F) establece los pines compartidos del microcontrolador como entradas/salidas digitales puras[cite: 6].'
         },
         {
-            id: 'q9', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Operaciones Bit a Bit (Python/C): Análisis de un Registro de Estatus Clínico (8 bits). El bit 3 (índice 2, peso decimal 4) indica batería baja si está en 1.',
-            texto: 'Complete la operación de máscara a nivel de bits (Bitwise AND) para evaluar EXCLUSIVAMENTE si el bit índice 2 de la variable `estado` está encendido.',
-            codigoBase: "if (estado ________ 0b00000100):",
-            respuestaEsperada: "&",
-            respuestaRegex: /&/,
-            retro: 'El operador Bitwise AND ("&") se utiliza para aislar o enmascarar bits específicos. Si "estado" tiene el bit 2 en 1, el resultado de la operación será mayor a cero (Verdadero); si está en 0, el resultado de toda la operación será 0 (Falso).'
+            id: 'q22', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'Python Variables Condicionales: Licencia de software clínico EMBC 2026.',
+            texto: 'Un bloque de código condicional puede usar una variable booleana como `licencia_conducir`. ¿Qué valores nativos puede almacenar?',
+            opciones: [
+                '1 y 0 (como enteros numéricos)',
+                'True y False',
+                '"Sí" y "No"',
+                'Null y Void'
+            ],
+            correcta: 1,
+            retro: 'En Python, las banderas lógicas o booleanas almacenan estrictamente los objetos nativos True o False con mayúscula inicial[cite: 3].'
         },
         {
-            id: 'q10', nivel: 3, tipo: 'codigo', pts: 4,
-            contexto: 'Ensamblador: Temporización por Hardware (Timer0). El TMR0 ha sido configurado para desbordar cada 1ms, disparando una interrupción.',
-            texto: 'Antes del RETFIE en la rutina de interrupción, ¿Qué bandera ESPECÍFICA dentro del registro INTCON debe ser limpiada obligatoriamente mediante un BCF para evitar bucles infinitos de interrupción?',
-            codigoBase: "BCF INTCON, ________",
+            id: 'q23', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Ensamblador Base: Directiva de terminación.',
+            texto: '¿Qué palabra reservada es absolutamente indispensable al final del código fuente para que el compilador MPASM finalice la lectura?',
+            opciones: [
+                'RETURN',
+                'RETFIE',
+                'END',
+                'STOP'
+            ],
+            correcta: 2,
+            retro: 'Es importante poner END al término del archivo, ya que sin esta directiva el programa simplemente no compila[cite: 6].'
+        },
+        {
+            id: 'q24', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'PIC18F Timers: Dra. Blanca diseña un temporizador de pulso con TMR0.',
+            texto: 'Escriba la bandera (flag) que el hardware del microcontrolador levanta cuando los registros del Timer0 se desbordan de FF a 00.',
+            codigoBase: "BTFSS INTCON, ________",
             respuestaEsperada: "TMR0IF",
             respuestaRegex: /tmr0if/i,
-            retro: 'El flag TMR0IF (Timer0 Overflow Interrupt Flag) se pone a 1 en hardware cuando el temporizador pasa de FF a 00. Si el software no lo regresa a 0, el procesador asumirá que la interrupción sigue pendiente e ingresará a la ISR de manera perpetua.'
+            retro: 'Como el contador es automático, el software debe verificar mediante BTFSS si el registro bandera TMR0IF ya indica término[cite: 7].'
+        },
+        {
+            id: 'q25', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'Python For loops: Limitando el número de épocas en entrenamiento AI.',
+            texto: 'Si utilizamos `range(5)`, ¿cuántas iteraciones se realizarán y cuál será el último valor de la variable iteradora?',
+            opciones: [
+                '5 iteraciones, el último valor es 5.',
+                '5 iteraciones, el último valor es 4.',
+                '4 iteraciones, el último valor es 4.',
+                '6 iteraciones, el último valor es 5.'
+            ],
+            correcta: 1,
+            retro: 'El bucle repetirá la rutina 5 veces y, como inicia en cero, los números del iterador irán del 0 al 4[cite: 5].'
+        },
+        {
+            id: 'q26', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Lógica Booleana: Inversión de señales en salidas de control.',
+            texto: '¿Qué instrucción permite conmutar (Toggle) el estado lógico actual de un solo bit en un puerto (ej. pasar de 1 a 0, y de 0 a 1 consecutivamente)?',
+            opciones: [
+                'BTFSS',
+                'BTG',
+                'ADDWF',
+                'MOVLW'
+            ],
+            correcta: 1,
+            retro: 'El mnemotécnico BTG (Bit Toggle) invierte el estado lógico del bit especificado en el registro objetivo (ej. BTG PORTD, 0)[cite: 7].'
+        },
+        {
+            id: 'q27', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Tipos de Datos: Archivos DICOM procesados para tesis maestría.',
+            texto: '¿Por qué las listas y diccionarios son estructuras inherentemente "mutables"?',
+            opciones: [
+                'Porque pueden convertirse en tuplas de solo lectura.',
+                'Porque sus elementos pueden ser alterados, añadidos o removidos de la estructura en tiempo de ejecución.',
+                'Porque solo almacenan datos numéricos primitivos.',
+                'Porque no respetan el orden de inserción.'
+            ],
+            correcta: 1,
+            retro: 'La mutabilidad significa que los elementos, ya sea cambiando valores por índices en listas[cite: 2] o modificando valores por clave en diccionarios[cite: 4], pueden actualizarse dinámicamente.'
+        },
+        {
+            id: 'q28', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'PIC18F Flujo: Carga de literal numérica.',
+            texto: 'Escriba el mnemotécnico necesario para cargar el valor binario B\'00000010\' al registro de trabajo W antes de enviarlo a un puerto.',
+            codigoBase: "________ B\'00000010\'",
+            respuestaEsperada: "MOVLW",
+            respuestaRegex: /movlw/i,
+            retro: 'La instrucción MOVLW (Move Literal to W) es requerida para asignar valores constantes previos a su envío hacia registros físicos[cite: 9].'
+        },
+        {
+            id: 'q29', nivel: 3, tipo: 'codigo', pts: 3,
+            contexto: 'Python Recursividad: Suma fraccionada de segmentos de audio.',
+            texto: 'Al utilizar una recursión basada en listas `lista[1:]`, la condición de parada verifica si la lista quedó vacía midiendo su longitud. Complete la función nativa.',
+            codigoBase: "if ________(lista)==0:",
+            respuestaEsperada: "len",
+            respuestaRegex: /len/i,
+            retro: 'La validación del caso base en este algoritmo recursivo comprueba si el array fue troceado en su totalidad comprobando su longitud (len)[cite: 1].'
+        },
+        {
+            id: 'q30', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Variables: Manejo de espacios de RAM.',
+            texto: 'En lenguaje Ensamblador PIC, ¿qué significa fundamentalmente la declaración estructurada de una variable como `VAR1 EQU 0x033`?',
+            opciones: [
+                'Que la variable siempre mantendrá el número 33 decimal.',
+                'Que se separa un espacio físico en la memoria RAM (dirección hexadecimal) y se le asigna una etiqueta simbólica.',
+                'Que se configura el temporizador para contar 33 ciclos.',
+                'Que el bit 3 del puerto 3 está activo.'
+            ],
+            correcta: 1,
+            retro: 'Declarar una variable en Ensamblador significa separar un espacio físico de memoria (dirección de registro) y ponerle nombre para referenciarlo[cite: 9].'
+        },
+        {
+            id: 'q31', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'Python Iteración: Interfaz de usuario para médicos.',
+            texto: '¿Qué tipo de datos arroja por defecto la vista `paciente.items()` cuando se itera en un bloque for?',
+            opciones: [
+                'Listas mutables.',
+                'Solo cadenas de texto (Strings).',
+                'Pares desempaquetados que contienen la clave y su respectivo valor (ej. "frecuencia_cardiaca" y 78).',
+                'Enteros indexados.'
+            ],
+            correcta: 2,
+            retro: 'El ciclo for asociado a .items() entrega secuencialmente el par correspondiente, lo que permite asignar tanto clave como valor a las variables del iterador[cite: 4].'
+        },
+        {
+            id: 'q32', nivel: 2, tipo: 'radio', pts: 3,
+            contexto: 'PIC18F Resultados ALU: Análisis ADDLW en algoritmos de control de potencia.',
+            texto: 'Un factor crítico al usar ADDLW frente a ADDWF es el manejo del registro de trabajo. Si ejecutamos `ADDLW 02H`, ¿es posible que W mantenga su valor original?',
+            opciones: [
+                'Sí, porque el valor literal se envía a una memoria paralela.',
+                'No, el valor inicial de W no es el mismo que al final, dado que W almacena forzosamente el resultado sobrescribiéndose.',
+                'Solo si la interrupción GIE está apagada.',
+                'Sí, porque 02H es simplemente una máscara lógica de lectura.'
+            ],
+            correcta: 1,
+            retro: 'Al sumar una literal con W, el resultado siempre se almacena en W, por lo que el valor inicial de W queda destruido (sobreescrito)[cite: 10].'
+        },
+        {
+            id: 'q33', nivel: 1, tipo: 'radio', pts: 3,
+            contexto: 'Python Bloques de Control: Arquitectura de decisiones If/Else.',
+            texto: 'Estructuralmente, ¿cómo determina Python dónde empieza y dónde termina la rutina perteneciente al condicional `else:`?',
+            opciones: [
+                'Por el uso de llaves {} englobando el código.',
+                'Por las sentencias de terminación EndIf.',
+                'Exclusivamente mediante la indentación (espaciado jerárquico) debajo de los dos puntos.',
+                'Por punto y coma al final de cada instrucción.'
+            ],
+            correcta: 2,
+            retro: 'Al igual que con el bloque if, la rutina a ejecutar dentro del else en Python está dictada por su nivel de indentación estructural tras los dos puntos[cite: 3].'
         }
     ];
 
@@ -257,7 +526,7 @@ const app = (function() {
                 if(document.hidden && !document.getElementById('vista-examen').classList.contains('hidden')) {
                     state.seguridad.salidas++;
                     document.getElementById('display-warnings').innerHTML = `<i class="fas fa-exclamation-triangle"></i> Infracciones: ${state.seguridad.salidas}`;
-                    showToast("⚠️ INFRACCIÓN: Abandono de pestaña detectado. Este evento será notificado al profesorado.", "error");
+                    showToast("⚠️ INFRACCIÓN: Abandono de pestaña detectado. Evento notificado en bitácora.", "error");
                 }
             });
 
@@ -268,33 +537,74 @@ const app = (function() {
                 document.getElementById('display-time').innerHTML = `<i class="fas fa-clock text-green-500"></i> Tiempo: ${formatearTiempo(state.seguridad.minutos, state.seguridad.segundos)}`;
             }, 1000);
 
-            renderPreguntas();
+            const container = document.getElementById('contenedor-preguntas');
+            container.innerHTML = '';
+            state.preguntasActivas.forEach((q, index) => {
+                const nivelBadge = q.nivel === 1 ? '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded border border-blue-200 font-bold tracking-wide"><i class="fas fa-brain mr-1"></i> NIVEL 1</span>' : 
+                                   q.nivel === 2 ? '<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded border border-yellow-200 font-bold tracking-wide"><i class="fas fa-cogs mr-1"></i> NIVEL 2</span>' : 
+                                   '<span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded border border-purple-200 font-bold tracking-wide"><i class="fas fa-code-branch mr-1"></i> NIVEL 3</span>';
+                
+                let html = `
+                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2 border-b border-gray-100 pb-3">
+                        <h3 class="text-lg font-bold text-gray-800">Reactivo ${index + 1} <span class="text-gray-400 text-sm ml-2 font-normal">Valor: ${q.pts} pts</span></h3>
+                        ${nivelBadge}
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 mb-5 text-indigo-900 text-sm italic shadow-inner">
+                        <i class="fas fa-laptop-code text-indigo-400 mr-2"></i> <strong>Contexto Clínico/Técnico:</strong> ${q.contexto}
+                    </div>
+                    <p class="text-gray-800 font-medium mb-5 text-base leading-relaxed">${q.texto}</p>
+                `;
+
+                if(q.tipo === 'radio') {
+                    html += `<div class="space-y-3">`;
+                    q.opciones.forEach((opc, i) => {
+                        html += `
+                        <label class="flex items-start p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group">
+                            <input type="radio" name="${q.id}" value="${i}" class="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300 mt-0.5">
+                            <span class="ml-3 text-gray-700 group-hover:text-blue-900">${opc}</span>
+                        </label>`;
+                    });
+                    html += `</div>`;
+                } else if (q.tipo === 'codigo') {
+                    const partes = q.codigoBase.split('________');
+                    html += `
+                    <div class="bg-gray-900 p-5 rounded-lg overflow-x-auto mt-2 shadow-inner border border-gray-700 flex flex-wrap items-center">
+                        <code class="code-font text-green-400 whitespace-pre-wrap">${q.codigoBase.includes('________') ? partes[0] : ''}</code>
+                        <input type="text" id="${q.id}" class="code-font bg-gray-800 text-white border-b-2 border-green-500 focus:outline-none focus:border-blue-400 px-3 py-1 mx-2 text-center my-2 text-lg min-w-[100px] w-auto max-w-xs" placeholder="[código]" autocomplete="off" spellcheck="false">
+                        <code class="code-font text-green-400 whitespace-pre-wrap">${q.codigoBase.includes('________') ? partes[1] : ''}</code>
+                    </div>`;
+                }
+                html += `</div>`;
+                container.innerHTML += html;
+            });
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            showToast("Evaluación iniciada. ¡Demuestra tu arquitectura lógica!", "success");
+            showToast("Evaluación iniciada.", "success");
         },
 
         entregar: () => {
-            if(!confirm("¿Está seguro de enviar su evaluación? Asegúrese de revisar la sintaxis de sus respuestas de código.")) return;
+            if(!confirm("¿Desea enviar y calcular su puntuación base 100?")) return;
 
             clearInterval(state.seguridad.intervaloTimer);
-            let score = 0;
-            let maxScore = 40; 
+            let score = 1; // 1 PUNTO BASE DE REGALO PARA CUADRAR A 100
+            let maxScore = 100; 
             let stepGrade = { funcionalidad: [], calidad: [], eficiencia: [] };
 
             state.preguntasActivas.forEach(q => {
                 let esCorrecto = false;
-                let respuestaUsuarioTexto = "";
+                let respuestaUsuarioTexto = "Sin responder";
                 let respuestaCorrectaTexto = "";
                 
                 if(q.tipo === 'radio') {
                     const select = document.querySelector(`input[name="${q.id}"]:checked`);
-                    respuestaUsuarioTexto = select ? q.opciones[parseInt(select.value)] : "Sin responder";
+                    if(select) {
+                        respuestaUsuarioTexto = q.opciones[parseInt(select.value)];
+                        if(parseInt(select.value) === q.correcta) esCorrecto = true;
+                    }
                     respuestaCorrectaTexto = q.opciones[q.correcta];
-                    
-                    if(select && parseInt(select.value) === q.correcta) esCorrecto = true;
                 } else if(q.tipo === 'codigo') {
                     const rawAns = document.getElementById(q.id).value;
-                    respuestaUsuarioTexto = rawAns.trim() || "Sin responder";
+                    if(rawAns.trim() !== '') respuestaUsuarioTexto = rawAns.trim();
                     respuestaCorrectaTexto = q.respuestaEsperada;
                     
                     const ansClean = rawAns.replace(/\s+/g, '').toLowerCase(); 
@@ -304,7 +614,6 @@ const app = (function() {
                 if(esCorrecto) {
                     score += q.pts;
                 } else {
-                    // BLOQUE DE RETROALIMENTACIÓN DETALLADA
                     const errorDetalle = `
                         <div class="mb-4 bg-white p-5 rounded-lg border border-gray-200 shadow-sm text-sm">
                             <p class="font-bold text-gray-800 mb-3">${q.texto}</p>
@@ -312,7 +621,7 @@ const app = (function() {
                                 <p class="text-red-600"><i class="fas fa-times-circle mr-1"></i><strong>Tu respuesta:</strong> <span class="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">${respuestaUsuarioTexto}</span></p>
                                 <p class="text-green-600"><i class="fas fa-check-circle mr-1"></i><strong>Respuesta correcta:</strong> <span class="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">${respuestaCorrectaTexto}</span></p>
                             </div>
-                            <p class="text-gray-600 leading-relaxed"><i class="fas fa-lightbulb text-yellow-500 mr-1"></i><strong>Justificación Técnica:</strong> ${q.retro}</p>
+                            <p class="text-gray-600 leading-relaxed"><i class="fas fa-lightbulb text-yellow-500 mr-1"></i><strong>Retroalimentación:</strong> ${q.retro}</p>
                         </div>
                     `;
                     
@@ -322,61 +631,61 @@ const app = (function() {
                 }
             });
 
-            const porcentaje = (score / maxScore) * 100;
             let rango = ""; let claseRango = "";
-            if(porcentaje >= 85) { rango = "🏆 Arquitecto de Firmware (Sobresaliente)"; claseRango = "text-green-600"; }
-            else if(porcentaje >= 60) { rango = "🛠️ Ingeniero Embebido (Aceptable)"; claseRango = "text-blue-600"; }
-            else { rango = "🌱 Analista Junior (Requiere Repaso Técnico)"; claseRango = "text-red-600"; }
+            if(score >= 85) { rango = "🏆 Nivel de Maestría"; claseRango = "text-green-600"; }
+            else if(score >= 70) { rango = "🛠️ Nivel Operativo Competente"; claseRango = "text-blue-600"; }
+            else { rango = "🌱 Área de Oportunidad Detectada"; claseRango = "text-red-600"; }
 
             document.getElementById('vista-examen').classList.add('hidden');
             const repo = document.getElementById('reporte-contenido');
             
             repo.innerHTML = `
                 <div class="border-4 border-gray-800 p-6 md:p-10 rounded-xl relative bg-white shadow-xl">
-                    <div class="absolute top-0 right-0 bg-gray-800 text-white px-4 py-1 rounded-bl-xl font-bold text-xs tracking-wider">REPORTE TÉCNICO OFICIAL</div>
+                    <div class="absolute top-0 right-0 bg-gray-800 text-white px-4 py-1 rounded-bl-xl font-bold text-xs tracking-wider">REPORTE AUDITADO</div>
                     
-                    <h2 class="text-2xl md:text-3xl font-black mb-6 text-gray-800 border-b-2 border-gray-200 pb-3">Diagnóstico de Desempeño Clínico/Técnico</h2>
+                    <h2 class="text-2xl md:text-3xl font-black mb-6 text-gray-800 border-b-2 border-gray-200 pb-3">Resumen Diagnóstico</h2>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
-                        <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Sustentante</p><p class="font-bold text-gray-800 truncate">${state.alumno.nombre}</p></div>
-                        <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Matrícula</p><p class="font-bold text-gray-800">${state.alumno.matricula} (S: ${state.alumno.serie})</p></div>
-                        <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Tiempo Empleado</p><p class="font-bold text-blue-600">${formatearTiempo(state.seguridad.minutos, state.seguridad.segundos)}</p></div>
+                        <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Nombre</p><p class="font-bold text-gray-800 truncate">${state.alumno.nombre}</p></div>
+                        <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">ID Universitario</p><p class="font-bold text-gray-800">${state.alumno.matricula} (S: ${state.alumno.serie})</p></div>
+                        <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Duración</p><p class="font-bold text-blue-600">${formatearTiempo(state.seguridad.minutos, state.seguridad.segundos)}</p></div>
                         <div><p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Integridad</p><p class="font-bold text-${state.seguridad.salidas > 0 ? 'red' : 'green'}-600">${state.seguridad.salidas} salidas</p></div>
                     </div>
 
                     <div class="text-center mb-10 p-8 bg-gray-100 rounded-xl shadow-inner border border-gray-200">
-                        <p class="text-gray-500 uppercase tracking-widest text-sm mb-2 font-bold">Puntaje Obtenido</p>
-                        <p class="text-6xl font-black mb-3 text-gray-800">${score} <span class="text-2xl text-gray-400">/ ${maxScore} pts</span></p>
+                        <p class="text-gray-500 uppercase tracking-widest text-sm mb-2 font-bold">Calificación Base 100</p>
+                        <p class="text-6xl font-black mb-3 text-gray-800">${score} <span class="text-2xl text-gray-400">/ 100 pts</span></p>
+                        <p class="text-sm font-medium text-gray-500 italic mb-4">*Incluye 1 punto base de validación.</p>
                         <p class="text-xl font-bold ${claseRango}">${rango}</p>
                     </div>
 
-                    <h3 class="text-xl font-bold text-gray-800 mb-5 flex items-center"><i class="fas fa-layer-group text-blue-500 mr-3"></i> Áreas de Oportunidad y Análisis de Errores</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-5 flex items-center"><i class="fas fa-layer-group text-blue-500 mr-3"></i> Áreas de Oportunidad y Correcciones</h3>
                     <div class="space-y-6">
                         
                         <div class="p-5 border-l-4 border-blue-500 bg-blue-50/30 rounded-r-lg shadow-sm">
-                            <h4 class="font-bold text-blue-800 mb-4 text-lg border-b border-blue-200 pb-2">1. Estructura y Conceptos Base</h4>
+                            <h4 class="font-bold text-blue-800 mb-4 text-lg border-b border-blue-200 pb-2">1. Conceptos Algorítmicos Fundamentales</h4>
                             ${stepGrade.funcionalidad.length > 0 ? 
                                 stepGrade.funcionalidad.join('') : 
-                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Excelente. Estructuras de datos y arquitectura de memoria asimiladas a la perfección.</p>'}
+                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Fundamentos teóricos impecables.</p>'}
                         </div>
 
                         <div class="p-5 border-l-4 border-yellow-500 bg-yellow-50/30 rounded-r-lg shadow-sm">
-                            <h4 class="font-bold text-yellow-800 mb-4 text-lg border-b border-yellow-200 pb-2">2. Aplicación Práctica y Manejo de Errores (Hardware/Software)</h4>
+                            <h4 class="font-bold text-yellow-800 mb-4 text-lg border-b border-yellow-200 pb-2">2. Lógica Aplicada a Dispositivos y Sistemas</h4>
                             ${stepGrade.calidad.length > 0 ? 
                                 stepGrade.calidad.join('') : 
-                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Óptimo. Sólido criterio para identificar fallas en entornos de ejecución críticos.</p>'}
+                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Criterio sobresaliente en control de errores.</p>'}
                         </div>
 
                         <div class="p-5 border-l-4 border-purple-500 bg-purple-50/30 rounded-r-lg shadow-sm">
-                            <h4 class="font-bold text-purple-800 mb-4 text-lg border-b border-purple-200 pb-2">3. Síntesis, Optimización y Registros</h4>
+                            <h4 class="font-bold text-purple-800 mb-4 text-lg border-b border-purple-200 pb-2">3. Implementación y Síntesis Sintáctica</h4>
                             ${stepGrade.eficiencia.length > 0 ? 
                                 stepGrade.eficiencia.join('') : 
-                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Sobresaliente. Dominio mnemotécnico superior y gran eficiencia en la lógica de programación.</p>'}
+                                '<p class="text-green-700 font-medium bg-green-50 p-3 rounded"><i class="fas fa-check-circle mr-2"></i>Sintaxis y codificación a nivel experto.</p>'}
                         </div>
                     </div>
 
                     <div class="mt-10 p-4 bg-gray-100 text-gray-500 rounded-lg text-center print-only text-xs uppercase tracking-wider font-semibold">
-                        Documento generado automáticamente por el sistema. ID Auditoría: ${Date.now().toString(16).toUpperCase()}
+                        Documento generado automáticamente. ID de Sesión: ${Date.now().toString(16).toUpperCase()}
                     </div>
                 </div>
             `;
@@ -388,7 +697,7 @@ const app = (function() {
                 matricula: state.alumno.matricula,
                 serie: state.alumno.serie,
                 aciertos: score,
-                calificacion: porcentaje.toFixed(1) + '%',
+                calificacion: score + '%',
                 tiempo: formatearTiempo(state.seguridad.minutos, state.seguridad.segundos),
                 salidasPestaña: state.seguridad.salidas
             };
@@ -399,9 +708,9 @@ const app = (function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             }).then(() => {
-                showToast("✅ Resultados sincronizados en la bitácora docente.", "success");
+                showToast("✅ Resultados sincronizados. PDF disponible.", "success");
             }).catch(e => {
-                showToast("Fallo de red. Descargue su PDF de respaldo.", "error");
+                showToast("Fallo de red. Descargue su PDF como comprobante.", "error");
             });
         }
     };
